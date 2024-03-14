@@ -78,8 +78,6 @@ void drawCircle(Point p1, int radius){
     int slow_coord=radius;//the addend for the coordinate that sometimes increments
     int E=3-2*radius;// E is the change in the decision formula used to determine whether or not to decrement the slow coord
     while(true){
-        std::cout<<(p1.x+slow_coord)<<","<<(p1.y+fast_coord)<<std::endl;
-        std::cout<<(p1.x+fast_coord)<<","<<(p1.y+slow_coord)<<std::endl;
         textureBuffer[((p1.y+fast_coord)*width) + (p1.x+slow_coord)] = 0xFFFFFFFF;// Octant 1
         textureBuffer[((p1.y+slow_coord)*width) + (p1.x+fast_coord)] = 0xFFFFFFFF;// Octant 2
         textureBuffer[((p1.y+slow_coord)*width) + (p1.x-fast_coord)] = 0xFFFFFFFF;// Octant 3
@@ -101,6 +99,12 @@ void drawCircle(Point p1, int radius){
         }
     }
 }
+
+void drawTriangle(Point &p1,Point &p2,Point &p3){
+    drawLine(p1,p2);
+    drawLine(p2,p3);
+    drawLine(p3,p1);
+}
 int main(int argc, char* argv[]){
     // Dimensions of screen
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -119,6 +123,16 @@ int main(int argc, char* argv[]){
     p3.x=250;
     p3.y=250;
     drawCircle(p3,100);
+    Point p4;
+    Point p5;
+    Point p6;
+    p4.x=300;
+    p4.y=300;
+    p5.x=300;
+    p5.y=450;
+    p6.x=420;
+    p6.y=420;
+    drawTriangle(p4,p5,p6);
     SDL_UpdateTexture( texture , NULL, textureBuffer, width * sizeof (uint32_t));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer,texture, NULL,NULL);
