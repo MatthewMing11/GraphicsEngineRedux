@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -8,10 +9,7 @@
 struct Point{
     int x;
     int y;
-    // int z;
-    // int w;
 };
-// bool isInsideTriangle();
 std::vector<Point> zBuffer;
 const int width=640;
 const int height=480;
@@ -73,10 +71,13 @@ void drawLine(Point &p1, Point &p2){
         }
     }
 }
-void drawCircle(Point p1, int radius){
+void drawCircle(Point &p1, int radius){
     int fast_coord=0;//the addend for the coordinate that always increments
     int slow_coord=radius;//the addend for the coordinate that sometimes increments
     int E=3-2*radius;// E is the change in the decision formula used to determine whether or not to decrement the slow coord
+    // if (radius>0){
+    //     drawCircle(p1,radius-1);
+    // }
     while(true){
         textureBuffer[((p1.y+fast_coord)*width) + (p1.x+slow_coord)] = 0xFFFFFFFF;// Octant 1
         textureBuffer[((p1.y+slow_coord)*width) + (p1.x+fast_coord)] = 0xFFFFFFFF;// Octant 2
@@ -99,11 +100,35 @@ void drawCircle(Point p1, int radius){
         }
     }
 }
+bool isInsideTriangle(Point &p1,Point &p2,Point &p3, Point &test_p){
+    float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
+    //barycentric coords
+    float b1=((p2.y-p3.y)*(test_p.x-p3.x)+(p3.x-p2.x)*(test_p.y-p3.y))*1.0f/det;
+    float b2=((p3.y-p1.y)*(test_p.x-p3.x)+(p1.x-p3.x)*(test_p.y-p3.y))*1.0f/det;
+    float b3=1-b1-b2;
+    return  b1>0 && b2>0 && b3>0;
+}
 
 void drawTriangle(Point &p1,Point &p2,Point &p3){
     drawLine(p1,p2);
     drawLine(p2,p3);
     drawLine(p3,p1);
+    Point bbox[2];
+    bbox[0].x=std::min({p1.x,p2.x,p3.x});
+    bbox[0].y=std::min({p1.y,p2.y,p3.y});
+    bbox[1].x=std::max({p1.x,p2.x,p3.x});
+    bbox[1].y=std::max({p1.y,p2.y,p3.y});
+    for(int y = bbox[0].y;y<bbox[1].y;y++){
+        for(int x=bbox[0].x;x<bbox[1].x;x++){
+            Point pixel;
+            pixel.x=x;
+            pixel.y=y;
+            if(isInsideTriangle(p1,p2,p3,pixel)){
+                textureBuffer[y*width + x] = 0xFFFFFFFF;
+            }
+        }
+    }
+
 }
 int main(int argc, char* argv[]){
     // Dimensions of screen
