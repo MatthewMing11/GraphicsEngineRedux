@@ -3,6 +3,7 @@
 #include <string>
 #include <stdlib.h>
 #include <algorithm>
+#include <limits>
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -50,6 +51,9 @@ class Vec3f{//inspired by Vec3f java graphics class
             Vec3f res=Vec3f(arr[1]*obj.arr[2]-arr[2]*obj.arr[1],arr[2]*obj.arr[0]-arr[0]*obj.arr[2],arr[0]*obj.arr[1]-arr[1]*obj.arr[0]);
             return res;
         }
+        float operator[](int index){
+            return arr[index];
+        }
         Vec3f normalize()//modifies itself and returns for convenience
         {
             if(arr[0]==0 && arr[1]==0 && arr[2]==0)//degenerate case zero vector
@@ -64,8 +68,67 @@ class Vec3f{//inspired by Vec3f java graphics class
             return res;
         }
 };
+class Matrix{
+    private:
+        float **arr;
+        int w;
+        int h;
+    public:
+        Matrix()=default;
+        Matrix(int row,int col){
+            arr = new float*[row];
+            for(int i=0;i<row;++i){
+                arr[i]= new float[col];
+            }
+            for(int i=0;i<row;++i){
+                for(int j=0;j<col;++j){
+                    arr[i][j]=0;
+                }
+            }
+            w=col;
+            h=row;
+        }
+        Matrix(Vec3f vec){
+            Matrix m=Matrix(1,3);
+            for(int i=0;i<3;i++){
+                m[0][i]=vec[i];
+            }
+        }
+        static Matrix identity(int size=3){
+            Matrix m = Matrix(size,size);
+            for(int i=0;i<size;++i){
+                m[i][i]=1;
+            }
+            return m;
+        } 
+        float* operator[](int index){
+            return arr[index];
+        }
+        Matrix operator*(Matrix const& obj)//dot product
+        {
+            Matrix m=Matrix(w,obj.h);
+            for (int i=0;i<w;i++){
+                for(int j=0;j<obj.h;j++){
+                    for(int k=0;k<obj.w;k++){
+                        m[i][j]+=arr[i][k]*obj.arr[k][j];
+                    }
+                }
+            }
+            return m;
+        }
+        ~Matrix(){
+            for(int i=0;i<h;i++){
+                delete[] arr[i];
+            }
+            delete[] arr;
+        }
+};
 const int width=640;
 const int height=480;
+const int depth =255;
+Matrix ModelView;
+Matrix Viewport;
+Matrix Projection;
 int screen[height][width]={0};
 uint32_t *textureBuffer;
 
@@ -155,35 +218,66 @@ void drawCircle(Vertex &p1, int radius){
         }
     }
 }
-bool isInsideTriangle(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
+Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
     //barycentric coords
     float b1=((p2.y-p3.y)*(test_p.x-p3.x)+(p3.x-p2.x)*(test_p.y-p3.y))*1.0f/det;
     float b2=((p3.y-p1.y)*(test_p.x-p3.x)+(p1.x-p3.x)*(test_p.y-p3.y))*1.0f/det;
     float b3=1-b1-b2;
-    return  b1>0 && b2>0 && b3>0;
+    Vec3f res=Vec3f(b3,b2,b1);
+    return res;
 }
 
-void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,float *zbuffer,uint32_t color){
-    drawLine(p1,p2,color);
-    drawLine(p2,p3,color);
-    drawLine(p3,p1,color);
+void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,float *zbuffer,uint32_t color){//mesh looks better in higher dimensions, might need antialiasing
+    // wireframe of triangle
+    // drawLine(p1,p2,color);
+    // drawLine(p2,p3,color);
+    // drawLine(p3,p1,color);
     Vertex bbox[2];
     bbox[0].x=std::min({p1.x,p2.x,p3.x});
     bbox[0].y=std::min({p1.y,p2.y,p3.y});
     bbox[1].x=std::max({p1.x,p2.x,p3.x});
     bbox[1].y=std::max({p1.y,p2.y,p3.y});
-    for(int y = bbox[0].y;y<bbox[1].y;y++){
-        for(int x=bbox[0].x;x<bbox[1].x;x++){
+    for(int y = bbox[0].y;y<bbox[1].y+1;y++){
+        for(int x=bbox[0].x;x<bbox[1].x+1;x++){
             Vertex pixel;
             pixel.x=x;
             pixel.y=y;
-            if(isInsideTriangle(p1,p2,p3,pixel)){
+            Vec3f bary_coords=barycentric(p1,p2,p3,pixel);
+            if (bary_coords[0]<0 || bary_coords[1]<0 || bary_coords[2]<0) continue;
+            pixel.z=p1.z*bary_coords[0]+p2.z*bary_coords[1]+p3.z*bary_coords[2];
+            if(zbuffer[y*width+x]<pixel.z){
+                zbuffer[y*width +x]=pixel.z;
                 textureBuffer[y*width + x] = color;
             }
         }
     }
 }
+void lookat(Vec3f eye, Vec3f center, Vec3f up){
+    Vec3f z=(eye-center).normalize();
+    Vec3f x= (up^z).normalize();
+    Vec3f y= (z^x).normalize();
+    Matrix Minv=Matrix::identity();
+    Matrix Tr= Matrix::identity();
+    for(int i=0;i<3;i++){
+        Minv[0][i]=x[i];
+        Minv[1][i]=y[i];
+        Minv[2][i]=z[i];
+        Tr[i][3]=-eye[i];
+    }
+    ModelView = Minv*Tr;
+}
+Matrix viewport(int x, int y, int w, int h){
+    Matrix m = Matrix::identity(4);
+    m[0][3] = x+w/2.f;
+    m[1][3] = y+h/2.f;
+    m[2][3] = depth/2.f;
+    m[0][0] = w/2.f;
+    m[1][1] = h/2.f;
+    m[2][2] = depth/2.f;
+    return m;
+}
+
 int main(int argc, char* argv[]){
     // Dimensions of screen
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -192,6 +286,9 @@ int main(int argc, char* argv[]){
     SDL_Texture * texture = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height );
     textureBuffer= new uint32_t[ width * height ];
     float *zbuffer = new float[width * height];
+    for(int i=0;i<width*height;i++){
+        zbuffer[i]=std::numeric_limits<int>::min();
+    }
     std::ifstream file("teapot.obj");
     std::string line;
     std::vector<std::vector<std::string>> info;//for debugging
