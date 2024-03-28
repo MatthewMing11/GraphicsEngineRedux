@@ -253,7 +253,7 @@ void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,float *zbuffer,uint32_t color
         }
     }
 }
-void lookat(Vec3f eye, Vec3f center, Vec3f up){
+void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     Vec3f z=(eye-center).normalize();
     Vec3f x= (up^z).normalize();
     Vec3f y= (z^x).normalize();
@@ -267,7 +267,7 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up){
     }
     ModelView = Minv*Tr;
 }
-Matrix viewport(int x, int y, int w, int h){
+void viewport(int x, int y, int w, int h){//initializes viewport matrix
     Matrix m = Matrix::identity(4);
     m[0][3] = x+w/2.f;
     m[1][3] = y+h/2.f;
@@ -275,9 +275,12 @@ Matrix viewport(int x, int y, int w, int h){
     m[0][0] = w/2.f;
     m[1][1] = h/2.f;
     m[2][2] = depth/2.f;
-    return m;
+    Viewport= m;
 }
-
+Matrix projection(){//initializes proejction matrix
+    Matrix m=Matrix::identity();
+    Projection = m;
+}
 int main(int argc, char* argv[]){
     // Dimensions of screen
     SDL_Init(SDL_INIT_EVERYTHING);
