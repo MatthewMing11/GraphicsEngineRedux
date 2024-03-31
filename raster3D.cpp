@@ -94,7 +94,7 @@ class Matrix{
                 m[0][i]=vec[i];
             }
         }
-        static Matrix identity(int size=3){
+        static Matrix identity(int size=4){
             Matrix m = Matrix(size,size);
             for(int i=0;i<size;++i){
                 m[i][i]=1;
@@ -277,9 +277,10 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
     m[2][2] = depth/2.f;
     Viewport= m;
 }
-Matrix projection(){//initializes proejction matrix
-    Matrix m=Matrix::identity();
-    Projection = m;
+void projection(float r){//initializes proejction matrix
+    Matrix m=Matrix::identity(4);
+    m[3][2]=r;
+    Projection= Matrix(m);
 }
 int main(int argc, char* argv[]){
     // Dimensions of screen
