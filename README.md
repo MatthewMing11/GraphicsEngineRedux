@@ -1,2 +1,2 @@
 # GraphicsEngineRedux
-Built using Wikipedia and TinyRenderer as a guide/reference.
+Built using Wikipedia, LearnOpenGL and TinyRenderer as a guide/reference.
