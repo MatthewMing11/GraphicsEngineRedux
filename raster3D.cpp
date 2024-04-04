@@ -293,7 +293,7 @@ int main(int argc, char* argv[]){
     for(int i=0;i<width*height;i++){
         zbuffer[i]=std::numeric_limits<int>::min();
     }
-    std::ifstream file("teapot.obj");
+    std::ifstream file("obj/teapot.obj");
     std::string line;
     std::vector<std::vector<std::string>> info;//for debugging
     std::vector<Vertex> vertices;
