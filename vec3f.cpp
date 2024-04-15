@@ -1,4 +1,5 @@
 #include "vec3f.h"
+#include <cmath>
 
 Vec3f::Vec3f(float x,float y, float z)
 {

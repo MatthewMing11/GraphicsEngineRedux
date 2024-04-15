@@ -5,6 +5,8 @@ Model *m = NULL;
 const int width=640;
 const int height=480;
 const int depth =255;
+uint32_t *textureBuffer;
+float *zbuffer;
 
 Vec3f light_dir(1,1,1);
 Vec3f eye(1,1,3);
@@ -28,10 +30,16 @@ struct GourandShader : public Shader {
 };
 struct PhongShader;
 int main(int argc, char * argv[]){
-    m = new Model("obj/teapot.obj");
+    if (argc==2){
+        m = new Model(argv[1]);
+    } else{
+        m = new Model("obj/teapot.obj");
+    }
     lookat(eye,center,up);
     viewport(width/8,height/8,width*3/4,height*3/4);
     projection(-1.f/(eye-center).norm());
+    textureBuffer= new uint32_t[ width * height ];
+    zbuffer = new float[width * height];
     light_dir.normalize();
     float scaleX=(xMax-xMin)/width;
     float scaleY=(yMax-yMin)/height;
