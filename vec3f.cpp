@@ -28,13 +28,17 @@ Vec3f Vec3f::operator^(Vec3f const& obj)//cross product
 float Vec3f::operator[](int index){
     return arr[index];
 }
+float Vec3f::norm()
+{
+    return std::sqrt(std::pow(arr[0],2)+std::pow(arr[1],2)+std::pow(arr[2],2));
+}
 Vec3f Vec3f::normalize()//modifies itself and returns for convenience
 {
     if(arr[0]==0 && arr[1]==0 && arr[2]==0)//degenerate case zero vector
     {
         return *this;
     }
-    float mag = std::sqrt(std::pow(arr[0],2)+std::pow(arr[1],2)+std::pow(arr[2],2));
+    float mag = this->norm();
     arr[0]=arr[0]/mag;
     arr[1]=arr[1]/mag;
     arr[2]=arr[2]/mag;
