@@ -277,7 +277,7 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
     m[2][2] = depth/2.f;
     Viewport= m;
 }
-void projection(float r){//initializes proejction matrix
+void projection(float r){//initializes projection matrix
     Matrix m=Matrix::identity(4);
     m[3][2]=r;
     Projection= Matrix(m);
