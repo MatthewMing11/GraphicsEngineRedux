@@ -54,6 +54,35 @@ void drawLine(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
         }
     }
 }
+void viewport(int x, int y, int w, int h){//initializes viewport matrix
+    Matrix m = Matrix::identity(4);
+    m[0][3] = x+w/2.f;
+    m[1][3] = y+h/2.f;
+    m[2][3] = depth/2.f;
+    m[0][0] = w/2.f;
+    m[1][1] = h/2.f;
+    m[2][2] = depth/2.f;
+    Viewport= m;
+}
+void projection(float r){//initializes projection matrix
+    Matrix m=Matrix::identity(4);
+    m[3][2]=r;
+    Projection= Matrix(m);
+}
+void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
+    Vec3f z=(eye-center).normalize();
+    Vec3f x= (up^z).normalize();
+    Vec3f y= (z^x).normalize();
+    Matrix Minv=Matrix::identity();
+    Matrix Tr= Matrix::identity();
+    for(int i=0;i<3;i++){
+        Minv[0][i]=x[i];
+        Minv[1][i]=y[i];
+        Minv[2][i]=z[i];
+        Tr[i][3]=-eye[i];
+    }
+    ModelView = Minv*Tr;
+}
 Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
     //barycentric coords

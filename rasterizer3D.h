@@ -4,6 +4,9 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
 
+extern Matrix ModelView;
+extern Matrix Viewport;
+extern Matrix Projection;
 
 void viewport(int x,int y, int w, int h);
 void projection(float coeff=0.f); // coeff = -1/c

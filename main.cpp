@@ -18,13 +18,15 @@ struct GourandShader : public Shader {
 
     virtual Matrix vertex(int face, int vertex){
         varying_intensity[vertex] = std::max(0.f);//get diffuse lighting intensity
-        Matrix vertex; // read the vertex frmo .obj file
+        Matrix vertex=Matrix(1,4); // read the vertex from .obj file
+        vertex=
         return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
     }
 
-    virtual bool fragment(Vec3f bar, uint32_t color){
+    virtual bool fragment(Vec3f bar, uint32_t &color){
         float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
-        color = intensity;
+        intensity_i=static_cast<int>(intensity*255);
+        color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
         return false; //we do not discard this pixel
     }
 };

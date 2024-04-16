@@ -1,14 +1,7 @@
 #include "model.h"
 #include "matrix.h"
-// void Mesh::setupMesh()
-// {
 
-// }
-Mesh::Mesh(vector<Vertex> vertices){
-    this->vertices = vertices;
-    setupMesh();
-}
-Model::loadModel(string path)
+Model::Model(char* path)
 {
     std::ifstream file(path);
     std::string line;
@@ -46,16 +39,5 @@ Model::loadModel(string path)
             Face data={std::stoi(tokens[1]),std::stoi(tokens[2]),std::stoi(tokens[3])};
             faces.push_back(data);
         }
-    }
-}
-void Mesh::Draw(Shader &shader){
-    for(int i=0;i<meshes.size();i++){
-        meshes[i].Draw(shader);
-    }
-}
-
-void Model::Draw(Shader &shader){
-    for(int i=0;i<meshes.size();i++){
-        meshes[i].Draw(shader);
     }
 }
