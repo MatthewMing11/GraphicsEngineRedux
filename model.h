@@ -13,16 +13,24 @@ struct Vertex{
     float z;
 };
 struct Face{
-    int first;
-    int second;
-    int third;
+    int points[3];
 };
+struct Normal{
+    float x;
+    float y;
+    float z;
+}
 
 class Model{
     private:
         vector<Vertex> vertices;
         vector<Face> faces;
-        vector<Mesh> meshes;
+        vector<Normal> normals;
+        float scaleX;
+        float scaleY;
     public:
         Model(char *path);
+        Vec3f v_normal(int iface, int nthvert);
+        Matrix vert(int iface, int nthvert);
+        int nfaces();
 };
