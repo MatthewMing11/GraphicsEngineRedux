@@ -15,7 +15,7 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up);
 struct Shader{
     virtual ~Shader();
     virtual Vec3f vertex(int face, int nthvert) = 0;
-    virtual bool fragment(Vec3f bar, uint_32 color)=0;
-}
+    virtual bool fragment(Vec3f bar, uint32_t color)=0;
+};
 
 void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer);

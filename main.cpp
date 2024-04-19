@@ -1,7 +1,7 @@
 #include "matrix.h"
 #include "rasterizer3D.h"
 
-Model *m = NULL;
+Model *model = NULL;
 const int width=640;
 const int height=480;
 const int depth =255;
@@ -17,7 +17,7 @@ struct GourandShader : public Shader {
     Vec3f varying_intensity; //written by vertex shader, read by fragment shader
 
     virtual Matrix vertex(int iface, int nthvert){
-        varying_intensity[nthvertex] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
+        varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
         Matrix vertex=model->vert(iface,nthvert); // read the vertex from .obj file
         return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
     }
@@ -32,9 +32,9 @@ struct GourandShader : public Shader {
 struct PhongShader;
 int main(int argc, char * argv[]){
     if (argc==2){
-        m = new Model(argv[1]);
+        model = new Model(argv[1]);
     } else{
-        m = new Model("obj/teapot.obj");
+        model = new Model("obj/teapot.obj");
     }
     lookat(eye,center,up);
     viewport(width/8,height/8,width*3/4,height*3/4);
@@ -53,6 +53,10 @@ int main(int argc, char * argv[]){
         drawTriangle(screen_coords[0],screen_coords[1],screen_coords[2],zbuffer,((color& 0xff)<<16) + ((color& 0xff)<<8)+(color& 0xff));
     }
     // sdl code to render object in window
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Window *window = SDL_CreateWindow("window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window,-1,0);
+    SDL_Texture * texture = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height );
     SDL_UpdateTexture( texture , NULL, textureBuffer, width * sizeof (uint32_t));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer,texture, NULL,NULL);
@@ -70,5 +74,5 @@ int main(int argc, char * argv[]){
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
-    delete m;
+    delete model;
 }

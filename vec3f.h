@@ -1,3 +1,4 @@
+#pragma once
 class Vec3f{//inspired by Vec3f java graphics class
     private:
         float arr[3];

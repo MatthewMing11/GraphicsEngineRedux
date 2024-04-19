@@ -1,3 +1,4 @@
+#pragma once
 #include "vec3f.h"
 class Matrix{
     private:
