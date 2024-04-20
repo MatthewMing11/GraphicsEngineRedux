@@ -1,4 +1,9 @@
-#include "rasterizer3D.cpp"
+#include "rasterizer3D.h"
+#include "vec3f.h"
+#include "matrix.h"
+#include "types.h"
+#include <algorithm>
+
 void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
     int dx=p2.x-p1.x;
     int dy=p2.y-p1.y;

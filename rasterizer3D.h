@@ -1,8 +1,7 @@
 #include "matrix.h"
 #include "vec3f.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
+#include "types.h"
+#include <cstdint>
 
 extern Matrix ModelView;
 extern Matrix Viewport;

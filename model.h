@@ -6,26 +6,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
-
-struct Vertex{
-    float x;
-    float y;
-    float z;
-};
-struct Face{
-    int points[3];
-};
-struct Normal{
-    float x;
-    float y;
-    float z;
-}
+#include "vec3f.h"
+#include "matrix.h"
+#include "types.h"
 
 class Model{
     private:
-        vector<Vertex> vertices;
-        vector<Face> faces;
-        vector<Normal> normals;
+        std::vector<Vertex> vertices;
+        std::vector<Face> faces;
+        std::vector<Normal> normals;
         float scaleX;
         float scaleY;
     public:

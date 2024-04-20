@@ -1,5 +1,6 @@
 #include "matrix.h"
 #include "rasterizer3D.h"
+#include "model.h"
 
 Model *model = NULL;
 const int width=640;
@@ -16,15 +17,15 @@ Vec3f up (0,1,0);
 struct GourandShader : public Shader {
     Vec3f varying_intensity; //written by vertex shader, read by fragment shader
 
-    virtual Matrix vertex(int iface, int nthvert){
+    Matrix vertex(int iface, int nthvert){
         varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
         Matrix vertex=model->vert(iface,nthvert); // read the vertex from .obj file
         return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
     }
 
-    virtual bool fragment(Vec3f bar, uint32_t &color){
+    bool fragment(Vec3f bar, uint32_t &color){
         float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
-        intensity_i=static_cast<int>(intensity*255);
+        int intensity_i=static_cast<int>(intensity*255);
         color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
         return false; //we do not discard this pixel
     }

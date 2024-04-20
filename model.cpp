@@ -1,5 +1,7 @@
 #include "model.h"
 #include "matrix.h"
+#include "vec3f.h"
+#include "types,h"
 
 Model::Model(char* path)
 {

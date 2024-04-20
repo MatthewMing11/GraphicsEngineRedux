@@ -1,4 +1,6 @@
 #include "matrix.h"
+#include "vec3f.h"
+
 Matrix::Matrix(int row,int col){
     arr = new float*[row];
     for(int i=0;i<row;++i){
@@ -18,7 +20,7 @@ Matrix::Matrix(Vec3f vec){
         m[0][i]=vec[i];
     }
 }
-static Matrix Matrix::identity(int size=4){
+Matrix Matrix::identity(int size=4){
     Matrix m = Matrix(size,size);
     for(int i=0;i<size;++i){
         m[i][i]=1;

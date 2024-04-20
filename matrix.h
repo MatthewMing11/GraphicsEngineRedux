@@ -9,7 +9,7 @@ class Matrix{
         Matrix()=default;
         Matrix(int row,int col);
         Matrix(Vec3f vec);
-        static Matrix identity(int size=4);
+        Matrix identity(int size=4);
         float* operator[](int index);
         Matrix operator*(Matrix const& obj);//dot product
         ~Matrix();
