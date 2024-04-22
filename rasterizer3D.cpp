@@ -4,6 +4,12 @@
 #include "types.h"
 #include <algorithm>
 
+Matrix ModelView;
+Matrix Viewport;
+Matrix Projection;
+
+Shader::~Shader(){}
+
 void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int width){
     int dx=p2.x-p1.x;
     int dy=p2.y-p1.y;
