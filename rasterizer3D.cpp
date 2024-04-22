@@ -4,7 +4,7 @@
 #include "types.h"
 #include <algorithm>
 
-void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
+void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int width){
     int dx=p2.x-p1.x;
     int dy=p2.y-p1.y;
     int curry=p1.y;
@@ -24,7 +24,7 @@ void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
     }
 }
 
-void drawLineHigh(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
+void drawLineHigh(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int width){
     int dx=p2.x-p1.x;
     int dy=p2.y-p1.y;
     int currx=p1.x;
@@ -43,19 +43,19 @@ void drawLineHigh(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color)
         D=D+2*dx;
     }
 }
-void drawLine(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color){
+void drawLine(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int width){
     if (abs(p1.y-p2.y)<abs(p1.x-p2.x)){
         if (p1.x<p2.x){
-            drawLineLow(p1,p2,color);
+            drawLineLow(p1,p2,textureBuffer,color,width);
         }else{
-            drawLineLow(p2,p1,color);
+            drawLineLow(p2,p1,textureBuffer,color,width);
         }
     }
     else{
         if (p1.y<p2.y){
-            drawLineHigh(p1,p2,color);
+            drawLineHigh(p1,p2,textureBuffer,color,width);
         }else{
-            drawLineHigh(p2,p1,color);
+            drawLineHigh(p2,p1,textureBuffer,color,width);
         }
     }
 }
@@ -98,7 +98,7 @@ Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     return res;
 }
 
-void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader shader,uint32_t *textureBuffer,float *zbuffer){//mesh looks better in higher dimensions, might need antialiasing
+void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width){//mesh looks better in higher dimensions, might need antialiasing
     // wireframe of triangle
     // drawLine(p1,p2,color);
     // drawLine(p2,p3,color);
@@ -115,8 +115,10 @@ void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader shader,uint32_t *textu
             pixel.y=y;
             Vec3f bary_coords=barycentric(p1,p2,p3,pixel);
             if (bary_coords[0]<0 || bary_coords[1]<0 || bary_coords[2]<0) continue;
+            uint32_t color=0;
             pixel.z=p1.z*bary_coords[0]+p2.z*bary_coords[1]+p3.z*bary_coords[2];
-            if(zbuffer[y*width+x]<pixel.z){
+            bool discard = shader.fragment(bary_coords,color);
+            if(!discard){
                 zbuffer[y*width +x]=pixel.z;
                 textureBuffer[y*width + x] = color;
             }
