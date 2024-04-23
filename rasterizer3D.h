@@ -7,8 +7,6 @@ extern Matrix ModelView;
 extern Matrix Viewport;
 extern Matrix Projection;
 
-const int depth =255;//depth is here because i don't use it elsewhere
-
 void viewport(int x,int y, int w, int h);
 void projection(float coeff=0.f); // coeff = -1/c
 void lookat(Vec3f eye, Vec3f center, Vec3f up);
