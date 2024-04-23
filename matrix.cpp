@@ -30,7 +30,7 @@ Matrix Matrix::identity(int size){
 float* Matrix::operator[](int index){
     return arr[index];
 }
-Matrix Matrix::operator*(Matrix const& obj)//dot product
+Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
 {
     Matrix m=Matrix(w,obj.h);
     for (int i=0;i<w;i++){

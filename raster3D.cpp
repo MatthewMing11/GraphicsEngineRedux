@@ -104,7 +104,7 @@ class Matrix{
         float* operator[](int index){
             return arr[index];
         }
-        Matrix operator*(Matrix const& obj)//dot product
+        Matrix operator*(Matrix const& obj)//matrix multiplication
         {
             Matrix m=Matrix(w,obj.h);
             for (int i=0;i<w;i++){

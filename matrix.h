@@ -11,6 +11,6 @@ class Matrix{
         Matrix(Vec3f vec);
         static Matrix identity(int size=4);
         float* operator[](int index);
-        Matrix operator*(Matrix const& obj);//dot product
+        Matrix operator*(Matrix const& obj);//matrix multiplication
         ~Matrix();
 };
