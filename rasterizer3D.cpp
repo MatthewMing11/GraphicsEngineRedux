@@ -78,7 +78,7 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
 void projection(float r){//initializes projection matrix
     Matrix m=Matrix::identity(4);
     m[3][2]=r;
-    Projection= Matrix(m);
+    Projection=m;
 }
 void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     Vec3f z=(eye-center).normalize();

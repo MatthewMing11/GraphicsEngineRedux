@@ -33,11 +33,6 @@ float* Matrix::operator[](int index){
 }
 Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
 {
-    std::cout<<"Matrix function"<<std::endl;
-    std::cout<<w<<std::endl;
-    std::cout<<h<<std::endl;
-    std::cout<<obj.w<<std::endl;
-    std::cout<<obj.h<<std::endl;
     Matrix res=Matrix(h,obj.w);
     for (int i=0;i<h;i++){
         for(int j=0;j<obj.w;j++){
