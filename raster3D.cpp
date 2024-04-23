@@ -106,15 +106,15 @@ class Matrix{
         }
         Matrix operator*(Matrix const& obj)//matrix multiplication
         {
-            Matrix m=Matrix(w,obj.h);
-            for (int i=0;i<w;i++){
-                for(int j=0;j<obj.h;j++){
-                    for(int k=0;k<obj.w;k++){
-                        m[i][j]+=arr[i][k]*obj.arr[k][j];
+            Matrix res=Matrix(h,obj.w);
+            for (int i=0;i<h;i++){
+                for(int j=0;j<obj.w;j++){
+                    for(int k=0;k<obj.h;k++){
+                        res[i][j]+=arr[i][k]*obj.arr[k][j];
                     }
                 }
             }
-            return m;
+            return res;
         }
         ~Matrix(){
             for(int i=0;i<h;i++){
