@@ -280,7 +280,7 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
 void projection(float r){//initializes projection matrix
     Matrix m=Matrix::identity(4);
     m[3][2]=r;
-    Projection= Matrix(m);
+    Projection= m;
 }
 int main(int argc, char* argv[]){
     // Dimensions of screen
