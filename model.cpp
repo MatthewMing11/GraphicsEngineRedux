@@ -85,7 +85,7 @@ Matrix Model::vert(int iface, int nthvert){
     Matrix res = Matrix(4,1);
     res[0][0]=static_cast<int>((vertices[faces[iface].points[nthvert]-1].x-xMin)/scaleX);
     res[1][0]=static_cast<int>((vertices[faces[iface].points[nthvert]-1].y-yMin)/scaleY);
-    res[2][0]=0;
+    res[2][0]=vertices[faces[iface].points[nthvert]-1].z;
     res[3][0]=1;
     return res;
 }
