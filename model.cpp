@@ -82,11 +82,11 @@ Vec3f Model::v_normal(int iface, int nthvert){
     return v_normal;
 }
 Matrix Model::vert(int iface, int nthvert){
-    Matrix res = Matrix(1,4);
+    Matrix res = Matrix(4,1);
     res[0][0]=static_cast<int>((vertices[faces[iface].points[nthvert]-1].x-xMin)/scaleX);
-    res[0][1]=static_cast<int>((vertices[faces[iface].points[nthvert]-1].y-yMin)/scaleY);
-    res[0][2]=0;
-    res[0][3]=1;
+    res[1][0]=static_cast<int>((vertices[faces[iface].points[nthvert]-1].y-yMin)/scaleY);
+    res[2][0]=0;
+    res[3][0]=1;
     return res;
 }
 int Model::nfaces(){
