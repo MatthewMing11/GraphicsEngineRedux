@@ -67,16 +67,16 @@ void drawLine(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int 
 }
 void viewport(int x, int y, int w, int h){//initializes viewport matrix
     Viewport = Matrix::identity(4);
-    Viewport[0][3] = x+w/2.f;
-    Viewport[1][3] = y+h/2.f;
-    Viewport[2][3] = 255/2.f;
-    Viewport[0][0] = w/2.f;
-    Viewport[1][1] = h/2.f;
-    Viewport[2][2] = 255/2.f;
+    Viewport(0,3) = x+w/2.f;
+    Viewport(1,3) = y+h/2.f;
+    Viewport(2,3) = 255/2.f;
+    Viewport(0,0) = w/2.f;
+    Viewport(1,1) = h/2.f;
+    Viewport(2,2) = 255/2.f;
 }
 void projection(float r){//initializes projection matrix
     Projection=Matrix::identity(4);
-    Projection[3][2]=r;
+    Projection(3,2)=r;
 }
 void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     Vec3f z=(eye-center).normalize();
@@ -84,10 +84,10 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     Vec3f y= (z^x).normalize();
     ModelView=Matrix::identity(4);
     for(int i=0;i<3;i++){
-        ModelView[0][i]=x[i];
-        ModelView[1][i]=y[i];
-        ModelView[2][i]=z[i];
-        ModelView[i][3]=-center[i];
+        ModelView(0,i)=x[i];
+        ModelView(1,i)=y[i];
+        ModelView(2,i)=z[i];
+        ModelView(i,3)=-center[i];
     }
 }
 Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){

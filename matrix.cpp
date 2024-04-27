@@ -18,19 +18,23 @@ Matrix::Matrix(int row,int col){
 Matrix::Matrix(Vec3f vec){
     Matrix m=Matrix(1,3);
     for(int i=0;i<3;i++){
-        m[0][i]=vec[i];
+        m(0,i)=vec[i];
     }
 }
 Matrix Matrix::identity(int size){
     Matrix m = Matrix(size,size);
     for(int i=0;i<size;++i){
-        m[i][i]=1;
+        m(i,i)=1;
     }
     return m;
 } 
-float* Matrix::operator[](int index){
-    return arr[index];
+float& Matrix::operator()(int x, int y){
+    return arr[x][y];
 }
+
+const float& Matrix::operator()(int x, int y) const {
+    return arr[x][y];
+} 
 Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
 {
     //gotta fix something breaking in here
@@ -48,7 +52,7 @@ Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
                 // std::cout<<obj.arr[k][j]<<std::endl;
                 // std::cout<<arr[i][k]<<std::endl;
                 // std::cout<<obj.arr[k][j]<<std::endl;
-                res[i][j]+=arr[i][k]*obj.arr[k][j];
+                res(i,j)+=arr[i][k]*obj.arr[k][j];
             }
         }
     }

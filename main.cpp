@@ -41,6 +41,7 @@ struct GourandShader : public Shader {
 struct PhongShader;
 int main(int argc, char * argv[]){
     if (argc==2){
+        std::cout<<argv[1]<<std::endl;
         model = new Model(argv[1],width,height);
     } else{
         model = new Model("obj/teapot.obj",width,height);
@@ -57,7 +58,7 @@ int main(int argc, char * argv[]){
     for(int i=0;i<model->nfaces();i++){
         Vertex screen_coords[3];
         for(int j=0;j<3;j++){
-            Vertex v={shader.vertex(i,j)[0][0],shader.vertex(i,j)[1][0],shader.vertex(i,j)[2][0]};
+            Vertex v={shader.vertex(i,j)(0,0),shader.vertex(i,j)(1,0),shader.vertex(i,j)(2,0)};
             screen_coords[j]=v;
         }
         drawTriangle(screen_coords[0],screen_coords[1],screen_coords[2],shader,textureBuffer,zbuffer,width);
