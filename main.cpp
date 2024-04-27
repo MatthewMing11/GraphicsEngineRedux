@@ -2,6 +2,7 @@
 #include "vec3f.h"
 #include "rasterizer3D.h"
 #include "model.h"
+#include <iostream>
 
 Model *model = NULL;
 const int width=640;
@@ -20,7 +21,14 @@ struct GourandShader : public Shader {
     virtual Matrix vertex(int iface, int nthvert){
         varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
         Matrix vertex=model->vert(iface,nthvert); // read the vertex from .obj file
-        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+        std::cout<<"V and P"<<std::endl;
+        Viewport=Viewport * Projection;
+        std::cout<<"V and M"<<std::endl;
+        Viewport=Viewport * ModelView;
+        std::cout<<"V and v"<<std::endl;
+        Viewport= Viewport * vertex;
+        return Viewport;
+        // return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
     }
 
     virtual bool fragment(Vec3f bar, uint32_t &color){
