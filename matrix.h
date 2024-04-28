@@ -9,6 +9,8 @@ class Matrix{
         Matrix()=default;
         Matrix(int row,int col);
         Matrix(Vec3f vec);
+        Matrix(const Matrix& m);//copy constructor
+        Matrix& operator=(const Matrix& m);//assignment operator
         static Matrix identity(int size=4);
         float& operator()(int x, int y);
         const float& operator()(int x, int y) const; 

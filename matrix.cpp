@@ -16,10 +16,25 @@ Matrix::Matrix(int row,int col){
     h=row;
 }
 Matrix::Matrix(Vec3f vec){
-    Matrix m=Matrix(1,3);
+    Matrix m= Matrix(1,3);
     for(int i=0;i<3;i++){
         m(0,i)=vec[i];
     }
+}
+Matrix::Matrix(const Matrix& other): w(other.w),h(other.h){
+    arr = new float*[h];
+    for(int i=0;i<h;++i){
+        arr[i]= new float[w];
+    }
+    operator=(other);
+}
+Matrix& Matrix::operator=(const Matrix& other){
+    for(int i=0;i<h;++i){
+        for(int j=0;j<w;++j){
+            arr[i][j]= other.arr[i][j];
+        }
+    }
+    return *this;
 }
 Matrix Matrix::identity(int size){
     Matrix m = Matrix(size,size);
