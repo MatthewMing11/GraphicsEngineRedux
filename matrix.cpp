@@ -1,7 +1,7 @@
 #include "matrix.h"
 #include "vec3f.h"
 #include <iostream>
-#include <cassert>
+
 Matrix::Matrix(int row,int col){
     arr = new float*[row];
     for(int i=0;i<row;++i){
@@ -74,7 +74,7 @@ Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
             }
         }
     }
-    std::cout<<"Done"<<std::endl;
+    // std::cout<<"Done"<<std::endl;
     return res;
 }
 Matrix::~Matrix(){
