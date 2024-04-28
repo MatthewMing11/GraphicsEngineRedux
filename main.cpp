@@ -61,7 +61,7 @@ int main(int argc, char * argv[]){
             Vertex v={shader.vertex(i,j)(0,0),shader.vertex(i,j)(1,0),shader.vertex(i,j)(2,0)};
             screen_coords[j]=v;
         }
-        drawTriangle(screen_coords[0],screen_coords[1],screen_coords[2],shader,textureBuffer,zbuffer,width);
+        drawTriangle(screen_coords[0],screen_coords[1],screen_coords[2],shader,textureBuffer,zbuffer,width,height);
     }
     // sdl code to render object in window
     SDL_Init(SDL_INIT_EVERYTHING);

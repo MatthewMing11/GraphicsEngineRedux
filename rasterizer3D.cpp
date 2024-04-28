@@ -101,7 +101,7 @@ Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     return res;
 }
 
-void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width){//mesh looks better in higher dimensions, might need antialiasing
+void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width, int height){//mesh looks better in higher dimensions, might need antialiasing
     // wireframe of triangle
     // drawLine(p1,p2,color);
     // drawLine(p2,p3,color);
@@ -121,7 +121,7 @@ void drawTriangle(Vertex &p1,Vertex &p2,Vertex &p3,Shader &shader,uint32_t *text
             uint32_t color=0;
             pixel.z=p1.z*bary_coords[0]+p2.z*bary_coords[1]+p3.z*bary_coords[2];
             bool discard = shader.fragment(bary_coords,color);
-            if(!discard && y*width +x < width*480){
+            if(!discard && y*width +x < width*height){
                 // std::cout<<y*width +x<<std::endl;
                 zbuffer[y*width +x]=pixel.z;
                 textureBuffer[y*width + x] = color;
