@@ -46,6 +46,10 @@ Model::Model(char* path,int width,int height)
             Vec3f data = Vec3f(std::stof(tokens[1]),std::stof(tokens[2]),std::stof(tokens[3]));
             normals.push_back(data);
         }
+        else if(tokens[0]=="vt"){
+            Vec3f data = Vec3f(std::stof(tokens[1]),std::stof(tokens[2]),std::stof(tokens[3]));
+            uvs.push_back(data);
+        }
     }
     this->faces=faces;
     this->vertices=vertices;

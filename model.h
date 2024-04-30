@@ -15,6 +15,7 @@ class Model{
         std::vector<Vertex> vertices;
         std::vector<Face> faces;
         std::vector<Vec3f> normals;
+        std::vector<Vec3f> uvs;
         float scaleX;
         float scaleY;
         float xMin;

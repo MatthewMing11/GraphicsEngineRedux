@@ -21,7 +21,7 @@ struct GourandShader : public Shader {
     virtual Matrix vertex(int iface, int nthvert){
         varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
         Matrix vertex=model->vert(iface,nthvert); // read the vertex from .obj file
-        // std::cout<<"V and P"<<std::endl;
+        // std::cout<<"V and P"<<std::endl;//stalls when separated, will fix this behavior later
         // Viewport=Viewport * Projection;
         // std::cout<<"V and M"<<std::endl;
         // Viewport=Viewport * ModelView;
@@ -34,7 +34,9 @@ struct GourandShader : public Shader {
     virtual bool fragment(Vec3f bar, uint32_t &color){
         float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
         int intensity_i=static_cast<int>(intensity*255);
+        // std::cout<<"intensity_i: "<<intensity_i<<std::endl;
         color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
+        // std::cout<<"color :"<<color<<std::endl;
         return false; //we do not discard this pixel
     }
 };
@@ -44,7 +46,7 @@ int main(int argc, char * argv[]){
         std::cout<<argv[1]<<std::endl;
         model = new Model(argv[1],width,height);
     } else{
-        model = new Model("obj/teapot.obj",width,height);
+        model = new Model("obj/african_head.obj",width,height);
     }
     lookat(eye,center,up);
     viewport(width/8,height/8,width*3/4,height*3/4);
