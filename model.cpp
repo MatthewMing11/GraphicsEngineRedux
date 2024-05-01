@@ -25,7 +25,9 @@ Model::Model(char* path,int width,int height)
         std::vector<std::string> tokens;
         while(std::getline(iss,token,' '))//tokenizing line
         {
-            tokens.push_back(token);
+            if (token!=""){//some lines have multiple whitespaces so ignore degenerate cases
+                tokens.push_back(token);
+            }
         }
         info.push_back(tokens);
         if (tokens[0]=="v"){
@@ -39,7 +41,33 @@ Model::Model(char* path,int width,int height)
             vertices.push_back(data);
         }
         else if (tokens[0]=="f"){
-            struct Face data={{std::stoi(tokens[1])-1,std::stoi(tokens[2])-1,std::stoi(tokens[3])-1}};//subtracting here so i don't have to subtract later
+            std::string facedata;
+            std::vector<int> vertexdata;
+            std::vector<int> uvdata;
+            std::vector<int> normaldata;
+            int fSlash,sSlash;
+            for(int i =1;i<4;i++){
+                facedata=tokens[i];
+                fSlash=facedata.find("/");
+                if(fSlash==std::string::npos){
+                    vertexdata.push_back(std::stoi(facedata)-1);
+                    continue;
+                }
+                vertexdata.push_back(std::stoi(facedata.substr(0,fSlash))-1);
+                facedata=facedata.substr(fSlash+1);
+                sSlash=facedata.find("/");
+                if(sSlash==std::string::npos){
+                    uvdata.push_back(std::stoi(facedata)-1);
+                    continue;
+                }
+                std::string optField=facedata.substr(0,sSlash);
+                if (optField.size()!=0){
+                    uvdata.push_back(std::stoi(facedata.substr(0,sSlash))-1);
+                }
+                facedata=facedata.substr(sSlash+1);
+                normaldata.push_back(std::stoi(facedata)-1);
+            }
+            struct Face data={vertexdata,uvdata,normaldata};//subtracting here so i don't have to subtract later
             faces.push_back(data);
         }
         else if(tokens[0]=="vn"){

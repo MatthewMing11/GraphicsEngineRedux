@@ -1,11 +1,14 @@
 #pragma once
+#include<vector>
 struct Vertex{
     float x;
     float y;
     float z;
 };
 struct Face{
-    int points[3];
+    std::vector<int> points;
+    std::vector<int> uvs;
+    std::vector<int> normals;
 };
 struct Normal{
     float x;
