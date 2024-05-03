@@ -1,6 +1,11 @@
 #include "vec3f.h"
 #include <cmath>
 
+Vec3f::Vec3f(){
+    arr[0]=0;
+    arr[1]=0;
+    arr[2]=0;
+}
 Vec3f::Vec3f(float x,float y, float z)
 {
     arr[0]=x;

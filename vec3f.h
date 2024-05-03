@@ -3,6 +3,7 @@ class Vec3f{//inspired by Vec3f java graphics class
     private:
         float arr[3];
     public:
+        Vec3f();
         Vec3f(float x,float y, float z);
         Vec3f operator+(Vec3f const& obj);
         Vec3f operator-(Vec3f const& obj);
