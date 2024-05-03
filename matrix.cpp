@@ -2,6 +2,11 @@
 #include "vec3f.h"
 #include <iostream>
 
+Matrix::Matrix(){
+    arr=nullptr;
+    w=0;
+    h=0;
+}
 Matrix::Matrix(int row,int col){
     arr = new float*[row];
     for(int i=0;i<row;++i){

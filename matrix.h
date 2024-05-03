@@ -6,7 +6,7 @@ class Matrix{
         int w;
         int h;
     public:
-        Matrix()=default;
+        Matrix();
         Matrix(int row,int col);
         Matrix(Vec3f vec);
         Matrix(const Matrix& m);//copy constructor
