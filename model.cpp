@@ -50,7 +50,7 @@ Model::Model(char* path,int width,int height)
                 facedata=tokens[i];
                 fSlash=facedata.find("/");
                 if(fSlash==std::string::npos){
-                    vertexdata.push_back(std::stoi(facedata)-1);
+                    vertexdata.push_back(std::stoi(facedata)-1);//subtracting here so i don't have to subtract later
                     continue;
                 }
                 vertexdata.push_back(std::stoi(facedata.substr(0,fSlash))-1);
@@ -67,7 +67,7 @@ Model::Model(char* path,int width,int height)
                 facedata=facedata.substr(sSlash+1);
                 normaldata.push_back(std::stoi(facedata)-1);
             }
-            struct Face data={vertexdata,uvdata,normaldata};//subtracting here so i don't have to subtract later
+            struct Face data={vertexdata,uvdata,normaldata};
             faces.push_back(data);
         }
         else if(tokens[0]=="vn"){
@@ -116,9 +116,9 @@ Vec3f Model::v_normal(int iface, int nthvert){
 }
 Matrix Model::vert(int iface, int nthvert){
     Matrix res = Matrix(4,1);
-    res(0,0)=vertices[faces[iface].points[nthvert]-1].x;
-    res(1,0)=vertices[faces[iface].points[nthvert]-1].y;
-    res(2,0)=vertices[faces[iface].points[nthvert]-1].z;
+    res(0,0)=vertices[faces[iface].points[nthvert]].x;
+    res(1,0)=vertices[faces[iface].points[nthvert]].y;
+    res(2,0)=vertices[faces[iface].points[nthvert]].z;
     res(3,0)=1;
     return res;
 }
