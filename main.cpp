@@ -82,7 +82,9 @@ int main(int argc, char * argv[]){
     }
     SDL_Quit();
     delete textureBuffer;
-    textureBuffer=NULL;
+    textureBuffer=nullptr;
+    delete zbuffer;
+    zbuffer=nullptr;
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
