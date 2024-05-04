@@ -5,13 +5,14 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <cstdlib>
 
 Matrix ModelView;
 Matrix Viewport;
 Matrix Projection;
 
 Shader::~Shader(){}
-
+// Line functions are deprecated unless working with 2D.
 void drawLineLow(Vertex &p1, Vertex &p2,uint32_t *textureBuffer,uint32_t color,int width){
     int dx=p2.x-p1.x;
     int dy=p2.y-p1.y;
@@ -93,13 +94,27 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     }
 }
 Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
-    float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
-    //barycentric coords
-    float b1=((p2.y-p3.y)*(test_p.x-p3.x)+(p3.x-p2.x)*(test_p.y-p3.y))*1.0f/det;
-    float b2=((p3.y-p1.y)*(test_p.x-p3.x)+(p1.x-p3.x)*(test_p.y-p3.y))*1.0f/det;
-    float b3=1-b1-b2;
-    Vec3f res=Vec3f(b3,b2,b1);
-    return res;
+    // float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
+    // //barycentric coords
+    // float b1=((p2.y-p3.y)*(test_p.x-p3.x)+(p3.x-p2.x)*(test_p.y-p3.y))*1.0f/det;
+    // float b2=((p3.y-p1.y)*(test_p.x-p3.x)+(p1.x-p3.x)*(test_p.y-p3.y))*1.0f/det;
+    // float b3=1-b1-b2;
+    // Vec3f res=Vec3f(b3,b2,b1);
+    Vec3f s[2];
+    Vec3f A={p1.x,p1.y,p1.z};
+    Vec3f B={p2.x,p2.y,p2.z};
+    Vec3f C={p3.x,p3.y,p3.z};
+    Vec3f P= {test_p.x,test_p.y,test_p.z};
+    for(int i=2;i--;){
+        s[i][0]=C[i]-A[i];
+        s[i][1]=B[i]-A[i];
+        s[i][2]=A[i]-P[i];
+    }
+    Vec3f u = s[0]^s[1];
+    if(std::abs(u[2])>1e-2)
+        return Vec3f(1.f-(u[0]+u[1])/u[2],u[1]/u[2],u[0]/u[2]);
+    return Vec3f(-1,1,1);
+    // return res;
 }
 
 void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width, int height){//mesh looks better in higher dimensions, might need antialiasing
@@ -126,13 +141,16 @@ void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *text
             pixel.x=x;
             pixel.y=y;
             Vec3f bary_coords=barycentric(b1,b2,b3,pixel);
-            if (bary_coords[0]<0 || bary_coords[1]<0 || bary_coords[2]<0) continue;
-            pixel.z=b1.z*bary_coords[0]+b2.z*bary_coords[1]+b3.z*bary_coords[2];
+            float z = p1(2,0)*bary_coords[0]+p2(2,0)*bary_coords[1]+p3(2,0)*bary_coords[2];
+            float w=p1(3,0)*bary_coords[0]+p2(3,0)*bary_coords[1]+p3(3,0)*bary_coords[2];
+            int frag_depth=std::max(0,std::min(255,int(z/w+.5)));
+            if (bary_coords[0]<0 || bary_coords[1]<0 || bary_coords[2]<0 ||zbuffer[y*width+x]>frag_depth) continue;
+            // pixel.z=b1.z*bary_coords[0]+b2.z*bary_coords[1]+b3.z*bary_coords[2];
             // pixel.z=p1.z*bary_coords[0]+p2.z*bary_coords[1]+p3.z*bary_coords[2];
             bool discard = shader.fragment(bary_coords,color);
-            if(!discard && y*width +x < width*height){
+            if(!discard ){//&& y*width +x < width*height
                 // std::cout<<y*width +x<<std::endl;
-                zbuffer[y*width +x]=pixel.z;
+                zbuffer[y*width +x]=frag_depth;
                 textureBuffer[y*width + x] = color;
             }
         }
