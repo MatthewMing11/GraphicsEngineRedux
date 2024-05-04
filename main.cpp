@@ -11,7 +11,7 @@ uint32_t *textureBuffer;
 float *zbuffer;
 
 Vec3f light_dir(1,1,1);
-Vec3f eye(1,1,3);
+Vec3f eye(0,-1,3);
 Vec3f center(0,0,0);
 Vec3f up (0,1,0);
 
