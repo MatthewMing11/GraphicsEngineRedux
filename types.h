@@ -10,8 +10,3 @@ struct Face{
     std::vector<int> uvs;
     std::vector<int> normals;
 };
-struct Normal{
-    float x;
-    float y;
-    float z;
-};
