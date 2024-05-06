@@ -117,7 +117,7 @@ Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     // return res;
 }
 
-void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width, int height){//mesh looks better in higher dimensions, might need antialiasing
+void drawTriangle(Matrix *pts,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width, int height){//mesh looks better in higher dimensions, might need antialiasing
     // Vertex bbox[2];
     // bbox[0].x=std::min({p1.x,p2.x,p3.x});
     // bbox[0].y=std::min({p1.y,p2.y,p3.y});
@@ -125,14 +125,16 @@ void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *text
     // bbox[1].y=std::max({p1.y,p2.y,p3.y});
     Vec3f bboxmin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),0);
     Vec3f bboxmax(-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),0);
-    for(int j=0;j<2;j++){
-        bboxmin[j]=std::min({bboxmin[j],p1(j,0)/p1(3,0),p2(j,0)/p2(3,0),p3(j,0)/p1(3,0)});
-        bboxmax[j]=std::max({bboxmin[j],p1(j,0)/p1(3,0),p2(j,0)/p2(3,0),p3(j,0)/p1(3,0)});
+    for(int i=0;i<3;i++){
+        for(int j=0;j<2;j++){
+            bboxmin[j]=std::min({bboxmin[j],pts[i](j,0)/pts[i](3,0)});
+            bboxmax[j]=std::max({bboxmax[j],pts[i](j,0)/pts[i](3,0)});
+        }
     }
     uint32_t color=0;
-    Vertex b1={p1(0,0)/p1(3,0),p1(1,0)/p1(3,0),p1(2,0)/p1(3,0)};
-    Vertex b2={p2(0,0)/p2(3,0),p2(1,0)/p2(3,0),p2(2,0)/p2(3,0)};
-    Vertex b3={p3(0,0)/p3(3,0),p3(1,0)/p3(3,0),p3(2,0)/p3(3,0)};
+    Vertex b1={pts[0](0,0)/pts[0](3,0),pts[0](1,0)/pts[0](3,0),pts[0](2,0)/pts[0](3,0)};
+    Vertex b2={pts[1](0,0)/pts[1](3,0),pts[1](1,0)/pts[1](3,0),pts[1](2,0)/pts[1](3,0)};
+    Vertex b3={pts[2](0,0)/pts[2](3,0),pts[2](1,0)/pts[2](3,0),pts[2](2,0)/pts[2](3,0)};
     // for(int y = bbox[0].y;y<bbox[1].y+1;y++){
     //     for(int x=bbox[0].x;x<bbox[1].x+1;x++){
     for(int y = bboxmin[1];y<bboxmax[1]+1;y++){
@@ -141,9 +143,9 @@ void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *text
             pixel.x=x;
             pixel.y=y;
             Vec3f bary_coords=barycentric(b1,b2,b3,pixel);
-            float z = p1(2,0)*bary_coords[0]+p2(2,0)*bary_coords[1]+p3(2,0)*bary_coords[2];
-            float w=p1(3,0)*bary_coords[0]+p2(3,0)*bary_coords[1]+p3(3,0)*bary_coords[2];
-            int frag_depth=std::max(0,std::min(255,int(z/w+.5)));
+            pixel.z = pts[0](2,0)*bary_coords[0]+pts[1](2,0)*bary_coords[1]+pts[2](2,0)*bary_coords[2];
+            float w=pts[0](3,0)*bary_coords[0]+pts[1](3,0)*bary_coords[1]+pts[2](3,0)*bary_coords[2];
+            int frag_depth=std::max(0,std::min(255,int(pixel.z/w+.5)));
             if (bary_coords[0]<0 || bary_coords[1]<0 || bary_coords[2]<0 ||zbuffer[y*width+x]>frag_depth) continue;
             // pixel.z=b1.z*bary_coords[0]+b2.z*bary_coords[1]+b3.z*bary_coords[2];
             // pixel.z=p1.z*bary_coords[0]+p2.z*bary_coords[1]+p3.z*bary_coords[2];

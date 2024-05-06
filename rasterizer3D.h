@@ -17,4 +17,4 @@ struct Shader{
     virtual bool fragment(Vec3f bar, uint32_t &color) = 0;
 };
 
-void drawTriangle(Matrix &p1,Matrix &p2,Matrix &p3,Shader &shader,uint32_t *textureBuffer,float *zbuffer,int width, int height);
+void drawTriangle(Matrix *pts,Shader &shader,uint32_t *textureBuffer,float *zbuffer,int width, int height);

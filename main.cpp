@@ -16,7 +16,7 @@ Vec3f center(0,0,0);
 Vec3f up (0,1,0);
 
 struct GourandShader : public Shader {
-    Vec3f varying_intensity=Vec3f(0.f,0.f,0.f); //written by vertex shader, read by fragment shader
+    Vec3f varying_intensity; //written by vertex shader, read by fragment shader
 
     virtual Matrix vertex(int iface, int nthvert){
         varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
@@ -62,7 +62,7 @@ int main(int argc, char * argv[]){
             // screen_coords[j]=v;
             screen_coords[j]=shader.vertex(i,j);
         }
-        drawTriangle(screen_coords[0],screen_coords[1],screen_coords[2],shader,textureBuffer,zbuffer,width,height);
+        drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
     }
     // sdl code to render object in window
     SDL_Init(SDL_INIT_EVERYTHING);

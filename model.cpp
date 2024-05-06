@@ -112,7 +112,7 @@ Model::Model(char* path,int width,int height)
 }
 Vec3f Model::v_normal(int iface, int nthvert){
     Vec3f v_normal = normals[faces[iface].points[nthvert]];
-    return v_normal;
+    return v_normal.normalize();
 }
 Matrix Model::vert(int iface, int nthvert){
     Matrix res = Matrix(4,1);
