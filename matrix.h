@@ -15,5 +15,6 @@ class Matrix{
         float& operator()(int x, int y);
         const float& operator()(int x, int y) const; 
         Matrix operator*(Matrix const& obj);//matrix multiplication
+        void set_col(int col, Vec3f uv);
         ~Matrix();
 };

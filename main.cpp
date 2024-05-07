@@ -11,7 +11,7 @@ uint32_t *textureBuffer;
 float *zbuffer;
 
 Vec3f light_dir(1,1,1);
-Vec3f eye(0,-1,3);
+Vec3f eye(1,1,3);
 Vec3f center(0,0,0);
 Vec3f up (0,1,0);
 
@@ -37,8 +37,56 @@ struct GourandShader : public Shader {
         color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
         return false; //we do not discard this pixel
     }
+    // virtual bool fragment(Vec3f bar, uint32_t &color){
+    //     float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
+    //     if (intensity >.85) intensity =1;
+    //     else if (intensity > .60) intensity =.80;
+    //     else if (intensity > .45) intensity = .60;
+    //     else if (intensity > .30) intensity = .45;
+    //     else if (intensity > .15) intensity = .30;
+    //     else intensity =0;
+    //     color=((static_cast<int>(intensity*255)& 0xff)<<16) + ((static_cast<int>(intensity*155)& 0xff)<<8);
+    //     return false; //we do not discard this pixel
+    // }
 };
-struct PhongShader;
+struct TextureShader : public Shader {
+    Vec3f          varying_intensity; // written by vertex shader, read by fragment shader
+    Matrix varying_uv= Matrix(2,3);        // same as above
+
+    virtual Matrix vertex(int iface, int nthvert) {
+        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+        varying_intensity[nthvert] = std::max(0.f, model->normal(iface, nthvert)*light_dir); // get diffuse lighting intensity
+        Matrix vertex = model->vert(iface, nthvert); // read the vertex from .obj file
+        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+    }
+    
+    virtual bool fragment(Vec3f bar, TGAColor &color) {
+        float intensity = varying_intensity*bar;   // interpolate intensity for the current pixel
+        Vec3f uv = varying_uv*bar;                 // interpolate uv for the current pixel
+        color = model->diffuse(uv)*intensity;      // well duh
+        return false;                              // no, we do not discard this pixel
+    }
+}; 
+struct PhongShader : public Shader {
+    Vec3f          varying_intensity; // written by vertex shader, read by fragment shader
+    Matrix varying_uv;        // same as above
+    Matrix uniform_M;
+    Matrix uniform_MIT;
+
+    virtual Matrix vertex(int iface, int nthvert) {
+        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+        varying_intensity[nthvert] = std::max(0.f, model->normal(iface, nthvert)*light_dir); // get diffuse lighting intensity
+        Matrix vertex = model->vert(iface, nthvert); // read the vertex from .obj file
+        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+    }
+    
+    virtual bool fragment(Vec3f bar, TGAColor &color) {
+        float intensity = varying_intensity*bar;   // interpolate intensity for the current pixel
+        Vec3f uv = varying_uv*bar;                 // interpolate uv for the current pixel
+        color = model->diffuse(uv)*intensity;      // well duh
+        return false;                              // no, we do not discard this pixel
+    }
+}; 
 int main(int argc, char * argv[]){
     if (argc==2){
         model = new Model(argv[1],width,height);

@@ -122,6 +122,12 @@ Matrix Model::vert(int iface, int nthvert){
     res(3,0)=1;
     return res;
 }
+Vec3f Model::uv(int iface,int nthvert){
+    return uv[faces[iface].uvs[nthvert]];
+}
+Vec3f Model::diffuse(Vec3f uv){
+
+}
 int Model::nfaces(){
     return faces.size();
 }

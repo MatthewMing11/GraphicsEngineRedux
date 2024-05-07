@@ -88,3 +88,8 @@ Matrix::~Matrix(){
     }
     delete[] arr;
 }
+
+void Matrix::set_col(int col, Vec3f uv){
+    arr[0][col]=uv[0];
+    arr[1][col]=uv[1];
+}
