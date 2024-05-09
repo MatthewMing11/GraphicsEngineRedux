@@ -114,6 +114,9 @@ Vec3f Model::v_normal(int iface, int nthvert){
     Vec3f v_normal = normals[faces[iface].points[nthvert]];
     return v_normal.normalize();
 }
+Vec3f Model::normal(Vec3f uvf){//normal map calculation
+    return uvf;
+}
 Vertex Model::vert(int iface, int nthvert){
     // Matrix res = Matrix(4,1);
     // res(0,0)=vertices[faces[iface].points[nthvert]].x;
@@ -125,8 +128,11 @@ Vertex Model::vert(int iface, int nthvert){
 Vec3f Model::uv(int iface,int nthvert){
     return uvs[faces[iface].uvs[nthvert]];
 }
-Vec3f Model::diffuse(Vec3f uv){
-    return uv;
+uint32_t Model::diffuse(Vec3f uv){//diffuse map calculation
+    return 0;
+}
+float Model::specular(Vec3f uvf){//specular map calculation
+    return 0.f;
 }
 int Model::nfaces(){
     return faces.size();
