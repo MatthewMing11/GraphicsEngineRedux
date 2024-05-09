@@ -26,6 +26,11 @@ float Vec3f::operator*(Vec3f const& obj)//dot product
 {
     return arr[0]*obj.arr[0]+arr[1]*obj.arr[1]+arr[2]*obj.arr[2];
 }
+Vec3f Vec3f::operator*(float const& k)//scalar multiplication
+{
+    Vec3f res=Vec3f(arr[0]*k,arr[1]*k,arr[2]*k);
+    return res;
+}
 Vec3f Vec3f::operator^(Vec3f const& obj)//cross product
 {
     Vec3f res=Vec3f(arr[1]*obj.arr[2]-arr[2]*obj.arr[1],arr[2]*obj.arr[0]-arr[0]*obj.arr[2],arr[0]*obj.arr[1]-arr[1]*obj.arr[0]);
