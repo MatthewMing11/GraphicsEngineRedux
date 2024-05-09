@@ -20,7 +20,7 @@ struct GourandShader : public Shader {
 
     virtual Matrix vertex(int iface, int nthvert){
         varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
-        Matrix vertex=model->vert(iface,nthvert); // read the vertex from .obj file
+        Matrix vertex=Matrix(model->vert(iface,nthvert),1); // read the vertex from .obj file
         // std::cout<<"V and P"<<std::endl;//stalls when separated, will fix this behavior later
         // Viewport=Viewport * Projection;
         // std::cout<<"V and M"<<std::endl;
@@ -49,44 +49,50 @@ struct GourandShader : public Shader {
     //     return false; //we do not discard this pixel
     // }
 };
-struct TextureShader : public Shader {
-    Vec3f          varying_intensity; // written by vertex shader, read by fragment shader
-    Matrix varying_uv= Matrix(2,3);        // same as above
+// struct PhongReflectShader : public Shader {
+//     Matrix varying_uv=Matrix(2,3);  // same as above
+//     Matrix uniform_M=Matrix(4,4);   //  Projection*ModelView
+//     Matrix uniform_MIT= Matrix(4,4); // (Projection*ModelView).invert_transpose()
 
-    virtual Matrix vertex(int iface, int nthvert) {
-        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-        varying_intensity[nthvert] = std::max(0.f, model->normal(iface, nthvert)*light_dir); // get diffuse lighting intensity
-        Matrix vertex = model->vert(iface, nthvert); // read the vertex from .obj file
-        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
-    }
-    
-    virtual bool fragment(Vec3f bar, TGAColor &color) {
-        float intensity = varying_intensity*bar;   // interpolate intensity for the current pixel
-        Vec3f uv = varying_uv*bar;                 // interpolate uv for the current pixel
-        color = model->diffuse(uv)*intensity;      // well duh
-        return false;                              // no, we do not discard this pixel
-    }
-}; 
-struct PhongShader : public Shader {
-    Vec3f          varying_intensity; // written by vertex shader, read by fragment shader
-    Matrix varying_uv;        // same as above
-    Matrix uniform_M;
-    Matrix uniform_MIT;
+//     virtual Vec4f vertex(int iface, int nthvert) {
+//         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+//         Matrix vertex model->vert(iface, nthvert); // read the vertex from .obj file
+//         return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+//     }
 
-    virtual Matrix vertex(int iface, int nthvert) {
-        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-        varying_intensity[nthvert] = std::max(0.f, model->normal(iface, nthvert)*light_dir); // get diffuse lighting intensity
-        Matrix vertex = model->vert(iface, nthvert); // read the vertex from .obj file
-        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
-    }
-    
-    virtual bool fragment(Vec3f bar, TGAColor &color) {
-        float intensity = varying_intensity*bar;   // interpolate intensity for the current pixel
-        Vec3f uv = varying_uv*bar;                 // interpolate uv for the current pixel
-        color = model->diffuse(uv)*intensity;      // well duh
-        return false;                              // no, we do not discard this pixel
-    }
-}; 
+//     virtual bool fragment(Vec3f bar, uint32_t &color) {
+//         Matrix uv = varying_uv*bar;
+//         Vec3f n = proj<3>(uniform_MIT*embed<4>(model->normal(uv))).normalize();
+//         Vec3f l = proj<3>(uniform_M  *embed<4>(light_dir        )).normalize();
+//         Vec3f r = (n*(n*l*2.f) - l).normalize();   // reflected light
+//         float spec = pow(std::max(r.z, 0.0f), model->specular(uv));
+//         float diff = std::max(0.f, n*l);
+//         uint32_t c = model->diffuse(uv);
+//         color = c;
+//         for (int i=0; i<3; i++) color[i] = std::min<float>(5 + c[i]*(diff + .6*spec), 255);
+//         return false;
+//     }
+// }; 
+// struct PhongShader : public Shader {
+//     Matrix varying_uv=Matrix(2,3);  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
+//     Matrix varying_nrm=Matrix(3,3); // normal per vertex to be interpolated by FS
+
+//     virtual Vec4f vertex(int iface, int nthvert) {
+//         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+//         varying_nrm.set_col(nthvert, proj<3>((Projection*ModelView).invert_transpose()*embed<4>(model->normal(iface, nthvert), 0.f)));
+//         Matrix vertex = Projection*ModelView*model->vert(iface, nthvert);
+//         varying_tri.set_col(nthvert, gl_Vertex);
+//         return vertex;
+//     }
+
+//     virtual bool fragment(Vec3f bar, uint32_t &color) {
+//         Vec3f bn = (varying_nrm*bar).normalize();
+//         Matrix uv = varying_uv*bar;
+//         float diff = std::max(0.f, bn*light_dir);
+//         color = model->diffuse(uv)*diff;
+//         return false;
+//     }
+// }; 
 int main(int argc, char * argv[]){
     if (argc==2){
         model = new Model(argv[1],width,height);

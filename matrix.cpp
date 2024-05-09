@@ -20,11 +20,29 @@ Matrix::Matrix(int row,int col){
     w=col;
     h=row;
 }
-Matrix::Matrix(Vec3f vec){
-    Matrix m= Matrix(1,3);
-    for(int i=0;i<3;i++){
-        m(0,i)=vec[i];
+Matrix::Matrix(Vec3f vec,float val){
+    arr=new float*[4];
+    w=1;
+    h=4;
+    for(int i=0;i<4;++i){
+        arr[i]= new float[1];
     }
+    for (int i=0;i<3;++i){
+        arr[i][0]=vec[i];
+    }
+    arr[3][0]=val;
+}
+Matrix::Matrix(Vertex v,float val){
+    arr=new float*[4];
+    w=1;
+    h=4;
+    for(int i=0;i<4;++i){
+        arr[i]= new float[1];
+    }
+    arr[0][0]=v.x;
+    arr[1][0]=v.y;
+    arr[2][0]=v.z;
+    arr[3][0]=val;
 }
 Matrix::Matrix(const Matrix& other): w(other.w),h(other.h){
     arr = new float*[h];

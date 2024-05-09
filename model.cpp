@@ -114,19 +114,19 @@ Vec3f Model::v_normal(int iface, int nthvert){
     Vec3f v_normal = normals[faces[iface].points[nthvert]];
     return v_normal.normalize();
 }
-Matrix Model::vert(int iface, int nthvert){
-    Matrix res = Matrix(4,1);
-    res(0,0)=vertices[faces[iface].points[nthvert]].x;
-    res(1,0)=vertices[faces[iface].points[nthvert]].y;
-    res(2,0)=vertices[faces[iface].points[nthvert]].z;
-    res(3,0)=1;
-    return res;
+Vertex Model::vert(int iface, int nthvert){
+    // Matrix res = Matrix(4,1);
+    // res(0,0)=vertices[faces[iface].points[nthvert]].x;
+    // res(1,0)=vertices[faces[iface].points[nthvert]].y;
+    // res(2,0)=vertices[faces[iface].points[nthvert]].z;
+    // res(3,0)=1;
+    return vertices[faces[iface].points[nthvert]];
 }
 Vec3f Model::uv(int iface,int nthvert){
-    return uv[faces[iface].uvs[nthvert]];
+    return uvs[faces[iface].uvs[nthvert]];
 }
 Vec3f Model::diffuse(Vec3f uv){
-
+    return uv;
 }
 int Model::nfaces(){
     return faces.size();

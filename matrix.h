@@ -1,5 +1,6 @@
 #pragma once
 #include "vec3f.h"
+#include "types.h"
 class Matrix{
     private:
         float **arr;
@@ -8,7 +9,8 @@ class Matrix{
     public:
         Matrix();
         Matrix(int row,int col);
-        Matrix(Vec3f vec);
+        Matrix(Vec3f vec,float val);
+        Matrix(Vertex v, float val);
         Matrix(const Matrix& m);//copy constructor
         Matrix& operator=(const Matrix& m);//assignment operator
         static Matrix identity(int size=4);

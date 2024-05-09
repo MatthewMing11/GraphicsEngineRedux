@@ -23,7 +23,7 @@ class Model{
     public:
         Model(char *path,int width,int height);
         Vec3f v_normal(int iface, int nthvert);
-        Matrix vert(int iface, int nthvert);
+        Vertex vert(int iface, int nthvert);
         Vec3f uv(int iface,int nthvert);
         Vec3f diffuse(Vec3f uv);
         int nfaces();
