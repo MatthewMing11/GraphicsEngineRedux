@@ -62,7 +62,7 @@ struct PhongReflectShader : public Shader {
 
     virtual bool fragment(Vec3f bar, uint32_t &color) {
         Vec3f uv = varying_uv*bar;
-        Matrix normal=uniform_MIT*Matrix(model->v_normal(uv),1);
+        Matrix normal=uniform_MIT*Matrix(model->normal(uv),1);
         Vec3f n = Vec3f(normal(0,0),normal(1,0),normal(2,0)).normalize();
         Matrix light=uniform_M  *Matrix(light_dir,1);
         Vec3f l = Vec3f(light(0,0),light(1,0),light(2,0)).normalize();
@@ -70,7 +70,7 @@ struct PhongReflectShader : public Shader {
         float spec = pow(std::max(r[2], 0.0f), model->specular(uv));
         float diff = std::max(0.f, n*l);
         uint32_t c = model->diffuse(uv);
-        color=std::min<float>(5 + (c>>16)*(diff + .6*spec), 255)<<16 + std::min<float>(5 + ((c>>8)&0xff)*(diff + .6*spec), 255)<<8+std::min<float>(5 + (c&0xff)*(diff + .6*spec), 255);
+        color=(static_cast<int>(std::min<float>(5 + (c>>16)*(diff + .6*spec), 255))<<16) + (static_cast<int>(std::min<float>(5 + ((c>>8)&0xff)*(diff + .6*spec), 255))<<8)+static_cast<int>(std::min<float>(5 + (c&0xff)*(diff + .6*spec), 255));
         return false;
     }
 }; 
@@ -80,7 +80,7 @@ struct PhongReflectShader : public Shader {
 
 //     virtual Vec4f vertex(int iface, int nthvert) {
 //         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-//         varying_nrm.set_col(nthvert, proj<3>((Projection*ModelView).invert_transpose()*embed<4>(model->normal(iface, nthvert), 0.f)));
+//         varying_nrm.set_col(nthvert, proj<3>((Projection*ModelView).invert_transpose()*Matrix(model->normal(iface, nthvert), 0.f)));
 //         Matrix vertex = Projection*ModelView*model->vert(iface, nthvert);
 //         varying_tri.set_col(nthvert, gl_Vertex);
 //         return vertex;
@@ -88,7 +88,7 @@ struct PhongReflectShader : public Shader {
 
 //     virtual bool fragment(Vec3f bar, uint32_t &color) {
 //         Vec3f bn = (varying_nrm*bar).normalize();
-//         Matrix uv = varying_uv*bar;
+//         Vec3f uv = varying_uv*bar;
 //         float diff = std::max(0.f, bn*light_dir);
 //         color = model->diffuse(uv)*diff;
 //         return false;
