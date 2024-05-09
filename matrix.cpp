@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include "vec3f.h"
 #include <iostream>
+#include <stdexcept>
 
 Matrix::Matrix(){
     arr=nullptr;
@@ -95,6 +96,20 @@ Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
             for(int k=0;k<obj.h;k++){
                 res(i,j)+=arr[i][k]*obj.arr[k][j];
             }
+        }
+    }
+    // std::cout<<"Done"<<std::endl;
+    return res;
+}
+Vec3f Matrix::operator*(Vec3f & obj)
+{
+    if (w!=3){
+        throw std::invalid_argument("received non-matching col dimension");
+    }
+    Vec3f res=Vec3f();
+    for (int i=0;i<h;i++){
+        for(int k=0;k<3;k++){
+            res[i]+=arr[i][k]*obj[k];
         }
     }
     // std::cout<<"Done"<<std::endl;
