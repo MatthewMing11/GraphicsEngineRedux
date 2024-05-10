@@ -70,6 +70,7 @@ struct PhongReflectShader : public Shader {
         float spec = pow(std::max(r[2], 0.0f), model->specular(uv));
         float diff = std::max(0.f, n*l);
         uint32_t c = model->diffuse(uv);
+        std::cout<<"color:"<<c<<std::endl;
         color=(static_cast<int>(std::min<float>(5 + (c>>16)*(diff + .6*spec), 255))<<16) + (static_cast<int>(std::min<float>(5 + ((c>>8)&0xff)*(diff + .6*spec), 255))<<8)+static_cast<int>(std::min<float>(5 + (c&0xff)*(diff + .6*spec), 255));
         return false;
     }
@@ -110,14 +111,24 @@ int main(int argc, char * argv[]){
     textureBuffer= new uint32_t[ width * height ];
     zbuffer = new float[width * height];
     
-    GourandShader shader;
-    for(int i=0;i<model->nfaces();i++){
-        // Vertex screen_coords[3];
+    // GourandShader shader;
+    // for(int i=0;i<model->nfaces();i++){
+    //     // Vertex screen_coords[3];
+    //     Matrix screen_coords[3];
+    //     for(int j=0;j<3;j++){
+    //         // Vertex v={shader.vertex(i,j)(0,0),shader.vertex(i,j)(1,0),shader.vertex(i,j)(2,0)};
+    //         // screen_coords[j]=v;
+    //         screen_coords[j]=shader.vertex(i,j);
+    //     }
+    //     drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
+    // }
+    PhongReflectShader shader;
+    shader.uniform_M   =  Projection*ModelView;
+    shader.uniform_MIT = (Projection*ModelView).invert_transpose();
+    for (int i=0; i<model->nfaces(); i++) {
         Matrix screen_coords[3];
-        for(int j=0;j<3;j++){
-            // Vertex v={shader.vertex(i,j)(0,0),shader.vertex(i,j)(1,0),shader.vertex(i,j)(2,0)};
-            // screen_coords[j]=v;
-            screen_coords[j]=shader.vertex(i,j);
+        for (int j=0; j<3; j++) {
+            screen_coords[j] = shader.vertex(i, j);
         }
         drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
     }

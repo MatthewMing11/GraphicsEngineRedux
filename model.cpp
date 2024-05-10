@@ -137,7 +137,14 @@ Vec3f Model::uv(int iface,int nthvert){
 }
 uint32_t Model::diffuse(Vec3f uv){
     TGAColor color = diffusemap_.get(uv[0]*diffusemap_.get_width(), uv[1]*diffusemap_.get_height());
-    return color[2]<<16+color[1]<<8+color[0];
+    uint8_t R,G,B;
+    R=color[2];
+    G=color[1];
+    B=color[0];
+    std::cout<<"R:"<<R<<std::endl;
+    std::cout<<"G:"<<G<<std::endl;
+    std::cout<<"B:"<<B<<std::endl;
+    return (R<<16)+(G<<8)+B;
 }
 float Model::specular(Vec3f uvf){
     return specularmap_.get(uvf[0]*specularmap_.get_width(), uvf[1]*specularmap_.get_height())[0]/1.f;;
