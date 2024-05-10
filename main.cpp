@@ -74,26 +74,28 @@ struct PhongReflectShader : public Shader {
         return false;
     }
 }; 
-// struct PhongShader : public Shader {
-//     Matrix varying_uv=Matrix(2,3);  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
-//     Matrix varying_nrm=Matrix(3,3); // normal per vertex to be interpolated by FS
+struct PhongShader : public Shader {
+    Matrix varying_uv=Matrix(2,3);  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
+    Matrix varying_nrm=Matrix(3,3); // normal per vertex to be interpolated by FS
+    Matrix varying_tri=Matrix(4,3); // to be used externally for phong shading
 
-//     virtual Vec4f vertex(int iface, int nthvert) {
-//         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
-//         varying_nrm.set_col(nthvert, proj<3>((Projection*ModelView).invert_transpose()*Matrix(model->normal(iface, nthvert), 0.f)));
-//         Matrix vertex = Projection*ModelView*model->vert(iface, nthvert);
-//         varying_tri.set_col(nthvert, gl_Vertex);
-//         return vertex;
-//     }
+    virtual Matrix vertex(int iface, int nthvert) {
+        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+        Matrix normal =(Projection*ModelView).invert_transpose()*Matrix(model->v_normal(iface, nthvert), 0.f);
+        varying_nrm.set_col(nthvert, Vec3f(normal(0,0),normal(1,0),normal(2,0)));
+        Matrix vertex = Projection*ModelView*Matrix(model->vert(iface, nthvert),1);
+        varying_tri.set_col(nthvert, Vec3f(vertex(0,0),vertex(1,0),vertex(2,0)));
+        return vertex;
+    }
 
-//     virtual bool fragment(Vec3f bar, uint32_t &color) {
-//         Vec3f bn = (varying_nrm*bar).normalize();
-//         Vec3f uv = varying_uv*bar;
-//         float diff = std::max(0.f, bn*light_dir);
-//         color = model->diffuse(uv)*diff;
-//         return false;
-//     }
-// }; 
+    virtual bool fragment(Vec3f bar, uint32_t &color) {
+        Vec3f bn = (varying_nrm*bar).normalize();
+        Vec3f uv = varying_uv*bar;
+        float diff = std::max(0.f, bn*light_dir);
+        color = model->diffuse(uv)*diff;
+        return false;
+    }
+}; 
 int main(int argc, char * argv[]){
     if (argc==2){
         model = new Model(argv[1],width,height);
