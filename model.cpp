@@ -109,13 +109,20 @@ Model::Model(char* path,int width,int height)
             normals[i]=normals[i].normalize();
         }
     }
+    load_texture(path, "_diffuse.tga", diffusemap_);
+    load_texture(path, "_nm.tga",      normalmap_);
+    load_texture(path, "_spec.tga",    specularmap_);
 }
 Vec3f Model::v_normal(int iface, int nthvert){
     Vec3f v_normal = normals[faces[iface].points[nthvert]];
     return v_normal.normalize();
 }
-Vec3f Model::normal(Vec3f uvf){//normal map calculation
-    return uvf;
+Vec3f Model::normal(Vec3f uvf){
+    TGAColor c = normalmap_.get(uvf[0]*normalmap_.get_width(), uvf[1]*normalmap_.get_height());
+    Vec3f res;
+    for (int i=0; i<3; i++)
+        res[2-i] = (float)c[i]/255.f*2.f - 1.f;
+    return res;
 }
 Vertex Model::vert(int iface, int nthvert){
     // Matrix res = Matrix(4,1);
@@ -128,12 +135,22 @@ Vertex Model::vert(int iface, int nthvert){
 Vec3f Model::uv(int iface,int nthvert){
     return uvs[faces[iface].uvs[nthvert]];
 }
-uint32_t Model::diffuse(Vec3f uv){//diffuse map calculation
-    return 0;
+uint32_t Model::diffuse(Vec3f uv){
+    TGAColor color = diffusemap_.get(uv[0]*diffusemap_.get_width(), uv[1]*diffusemap_.get_height());
+    return color[2]<<16+color[1]<<8+color[0];
 }
-float Model::specular(Vec3f uvf){//specular map calculation
-    return 0.f;
+float Model::specular(Vec3f uvf){
+    return specularmap_.get(uvf[0]*specularmap_.get_width(), uvf[1]*specularmap_.get_height())[0]/1.f;;
 }
 int Model::nfaces(){
     return faces.size();
+}
+void Model::load_texture(std::string filename, const char *suffix, TGAImage &img) {
+    std::string texfile(filename);
+    size_t dot = texfile.find_last_of(".");
+    if (dot!=std::string::npos) {
+        texfile = texfile.substr(0,dot) + std::string(suffix);
+        std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
+        img.flip_vertically();
+    }
 }

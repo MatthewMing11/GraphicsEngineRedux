@@ -9,6 +9,7 @@
 #include "vec3f.h"
 #include "matrix.h"
 #include "types.h"
+#include "tgaimage.h"
 
 class Model{
     private:
@@ -16,6 +17,10 @@ class Model{
         std::vector<Face> faces;
         std::vector<Vec3f> normals;
         std::vector<Vec3f> uvs;
+        TGAImage diffusemap_;
+        TGAImage normalmap_;
+        TGAImage specularmap_;
+        void load_texture(std::string filename, const char *suffix, TGAImage &img);
         float scaleX;
         float scaleY;
         float xMin;
