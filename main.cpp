@@ -70,7 +70,7 @@ struct PhongReflectShader : public Shader {
         float spec = pow(std::max(r[2], 0.0f), model->specular(uv));
         float diff = std::max(0.f, n*l);
         uint32_t c = model->diffuse(uv);
-        std::cout<<"color:"<<c<<std::endl;
+        // std::cout<<"color:"<<c<<std::endl;
         color=(static_cast<int>(std::min<float>(5 + (c>>16)*(diff + .6*spec), 255))<<16) + (static_cast<int>(std::min<float>(5 + ((c>>8)&0xff)*(diff + .6*spec), 255))<<8)+static_cast<int>(std::min<float>(5 + (c&0xff)*(diff + .6*spec), 255));
         return false;
     }

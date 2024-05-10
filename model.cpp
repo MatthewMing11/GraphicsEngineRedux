@@ -141,9 +141,6 @@ uint32_t Model::diffuse(Vec3f uv){
     R=color[2];
     G=color[1];
     B=color[0];
-    std::cout<<"R:"<<R<<std::endl;
-    std::cout<<"G:"<<G<<std::endl;
-    std::cout<<"B:"<<B<<std::endl;
     return (R<<16)+(G<<8)+B;
 }
 float Model::specular(Vec3f uvf){
