@@ -118,10 +118,10 @@ Vec3f Matrix::operator*(Vec3f & obj)
 Matrix Matrix::invert_transpose(){
     //inverse calculation from mesa implementation of glu library
     float inv[4][4], det;
-    float matrix[16]={arr[0][0],arr[0][1],arr[0][2],arr[0][3],
+    float m[16]={arr[0][0],arr[0][1],arr[0][2],arr[0][3],
                     arr[1][0],arr[1][1],arr[1][2],arr[1][3],
                     arr[2][0],arr[2][1],arr[2][2],arr[2][3],
-                    arr[3][0],arr[3][1],arr[3][2],arr[3][3]}
+                    arr[3][0],arr[3][1],arr[3][2],arr[3][3]};
     inv[0][0] = m[5]  * m[10] * m[15] - 
              m[5]  * m[11] * m[14] - 
              m[9]  * m[6]  * m[15] + 
@@ -248,7 +248,7 @@ Matrix Matrix::invert_transpose(){
         }
     }
     //tranpose portion
-    float temp
+    float temp;
     for(int i=0;i<4;i++){
         for(int j=i+1;j<4;j++){
             temp=mat(i,j);
