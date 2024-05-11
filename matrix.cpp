@@ -258,6 +258,15 @@ Matrix Matrix::invert_transpose(){
     }
     return mat;
 }
+Matrix Matrix::transpose(){
+    Matrix res = Matrix(w,h);
+    for (int i = 0; i < w; i++){
+        for(int j=0;j<h;j++){
+            res(i,j) = arr[j][i];
+        }
+    }
+    return res;
+}
 Matrix::~Matrix(){
     for(int i=0;i<h;i++){
         delete[] arr[i];

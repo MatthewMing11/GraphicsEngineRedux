@@ -19,6 +19,7 @@ class Matrix{
         Matrix operator*(Matrix const& obj);//matrix multiplication
         Vec3f operator*(Vec3f &obj);//matrix multiplication with a "vector"
         Matrix invert_transpose();//inverse then tranpose matrix
+        Matrix transpose();
         void set_col(int col, Vec3f uv);
         ~Matrix();
 };
