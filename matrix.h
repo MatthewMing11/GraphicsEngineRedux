@@ -21,6 +21,7 @@ class Matrix{
         Matrix invert_transpose();//inverse then tranpose matrix
         Matrix transpose();
         Matrix invert();
+        Vec3f col(int col);
         void set_col(int col, Vec3f uv);
         ~Matrix();
 };

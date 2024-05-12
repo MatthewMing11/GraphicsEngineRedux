@@ -268,7 +268,10 @@ Matrix Matrix::transpose(){
     return res;
 }
 Matrix Matrix::invert(){
-    return  invert_transpose().transpose()
+    return  invert_transpose().transpose();
+}
+Vec3f Matrix::col(int col){
+    return Vec3f(arr[0][col],arr[1][col],arr[2][col]);
 }
 Matrix::~Matrix(){
     for(int i=0;i<h;i++){
