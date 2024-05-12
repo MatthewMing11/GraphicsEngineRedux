@@ -267,6 +267,9 @@ Matrix Matrix::transpose(){
     }
     return res;
 }
+Matrix Matrix::invert(){
+    return  invert_transpose().transpose()
+}
 Matrix::~Matrix(){
     for(int i=0;i<h;i++){
         delete[] arr[i];
@@ -275,6 +278,7 @@ Matrix::~Matrix(){
 }
 
 void Matrix::set_col(int col, Vec3f uv){
-    arr[0][col]=uv[0];
-    arr[1][col]=uv[1];
+    for(int i=0;i<std::min(h,3);i++){
+        arr[i][col]=uv[i];
+    }
 }
