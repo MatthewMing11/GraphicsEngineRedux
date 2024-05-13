@@ -12,6 +12,7 @@ class Vec3f{//inspired by Vec3f java graphics class
         Vec3f operator/(float const& k);
         Vec3f operator^(Vec3f const& obj);//cross product
         float& operator[](int index);
+        const float& operator[](int index) const;
         Vec3f& operator+=(Vec3f const& obj);
         float norm();
         Vec3f normalize();//modifies itself and returns for convenience

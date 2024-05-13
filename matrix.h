@@ -17,7 +17,7 @@ class Matrix{
         float& operator()(int x, int y);
         const float& operator()(int x, int y) const; 
         Matrix operator*(Matrix const& obj);//matrix multiplication
-        Vec3f operator*(Vec3f &obj);//matrix multiplication with a "vector"
+        Vec3f operator*(Vec3f const&obj);//matrix multiplication with a "vector"
         Matrix invert_transpose();//inverse then tranpose matrix (only for 4x4 matrices)
         Matrix transpose();
         Matrix invert();//only for 3x3 matrices

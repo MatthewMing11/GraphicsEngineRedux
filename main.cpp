@@ -80,7 +80,7 @@ struct PhongShader : public Shader {
     Matrix varying_uv=Matrix(2,3);  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     Matrix varying_nrm=Matrix(3,3); // normal per vertex to be interpolated by FS
     Matrix varying_tri=Matrix(4,3); // to be used externally for phong shading
-    Matrix ndc_tri=Matrix(3,3);     // triangle in normalized device coordinates
+    // Matrix ndc_tri=Matrix(3,3);     // triangle in normalized device coordinates
 
     virtual Matrix vertex(int iface, int nthvert) {
         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
@@ -94,7 +94,7 @@ struct PhongShader : public Shader {
         varying_tri.set_col(nthvert, Vec3f(vertex(0,0),vertex(1,0),vertex(2,0)));
         // std::cout<<vertex(3,0)<<" missing"<<std::endl;
         varying_tri(3,nthvert)=vertex(3,0);//temp fix for w coord not being read in set_col
-        ndc_tri.set_col(nthvert, Vec3f(vertex(0,0)/vertex(3,0),vertex(1,0)/vertex(3,0),vertex(2,0)/vertex(3,0)));
+        // ndc_tri.set_col(nthvert, Vec3f(vertex(0,0)/vertex(3,0),vertex(1,0)/vertex(3,0),vertex(2,0)/vertex(3,0)));
         return vertex;
     }
 
@@ -115,27 +115,27 @@ struct PhongShader : public Shader {
         // }
         Vec3f bn = (varying_nrm*bar).normalize();
         Vec3f uv = varying_uv*bar;
-        // float diff = std::max(0.f, bn*light_dir);
-        Matrix A=Matrix(3,3);
-        for(int i=0;i<3;i++){
-            A(0,i) = (ndc_tri.col(1) - ndc_tri.col(0))[i];
-            A(1,i) = (ndc_tri.col(2) - ndc_tri.col(0))[i];
-            A(2,i) = bn[i];
-        }
-        Matrix AI= A.invert();
-        Vec3f first=Vec3f(varying_uv(0,1) - varying_uv(0,0), varying_uv(0,2) - varying_uv(0,0), 0);
-        Vec3f second = Vec3f(varying_uv(1,1) - varying_uv(1,0), varying_uv(1,2) - varying_uv(1,0), 0);
-        Vec3f i = AI * first;
-        Vec3f j = AI * second;
+        float diff = std::max(0.f, bn*light_dir);
+        // Matrix A=Matrix(3,3);
+        // for(int i=0;i<3;i++){
+        //     A(0,i) = (ndc_tri.col(1) - ndc_tri.col(0))[i];
+        //     A(1,i) = (ndc_tri.col(2) - ndc_tri.col(0))[i];
+        //     A(2,i) = bn[i];
+        // }
+        // Matrix AI= A.invert();
+        // Vec3f first=Vec3f(varying_uv(0,1) - varying_uv(0,0), varying_uv(0,2) - varying_uv(0,0), 0);
+        // Vec3f second = Vec3f(varying_uv(1,1) - varying_uv(1,0), varying_uv(1,2) - varying_uv(1,0), 0);
+        // Vec3f i = AI * first;
+        // Vec3f j = AI * second;
 
-        Matrix B=Matrix(3,3);
-        B.set_col(0, i.normalize());
-        B.set_col(1, j.normalize());
-        B.set_col(2, bn);
-        Vec3f normal = model->normal(uv);
-        Vec3f n = (B*normal).normalize();
+        // Matrix B=Matrix(3,3);
+        // B.set_col(0, i.normalize());
+        // B.set_col(1, j.normalize());
+        // B.set_col(2, bn);
+        // Vec3f normal = model->normal(uv);
+        // Vec3f n = (B*normal).normalize();
 
-        float diff = std::max(0.f, n*light_dir);
+        // float diff = std::max(0.f, n*light_dir);
         color = model->diffuse(uv)*diff;
         // std::cout<<color<<std::endl;
         return false;

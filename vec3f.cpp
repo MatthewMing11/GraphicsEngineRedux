@@ -44,6 +44,9 @@ Vec3f Vec3f::operator^(Vec3f const& obj)//cross product
 float& Vec3f::operator[](int index){
     return arr[index];
 }
+const float& Vec3f::operator[](int index) const{
+    return arr[index];
+}
 
 Vec3f& Vec3f::operator+=(Vec3f const& obj){
     this->arr[0]+=obj.arr[0];

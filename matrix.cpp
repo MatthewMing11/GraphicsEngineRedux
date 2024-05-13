@@ -101,7 +101,7 @@ Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
     // std::cout<<"Done"<<std::endl;
     return res;
 }
-Vec3f Matrix::operator*(Vec3f & obj)
+Vec3f Matrix::operator*(Vec3f const& obj)
 {
     if (w!=3){
         throw std::invalid_argument("received non-matching col dimension");
