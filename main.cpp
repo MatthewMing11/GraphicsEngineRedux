@@ -179,14 +179,24 @@ int main(int argc, char * argv[]){
     //     }
     //     drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
     // }
-    PhongShader shader;
-    for (int i=0; i<model->nfaces(); i++) {
-        for (int j=0; j<3; j++) {
-            shader.vertex(i, j);
-        }
-        // std::cout<<i<<std::endl;
-        drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
+    Matrix m=Matrix(3,3);
+    m.set_col(0,Vec3f(1,2,3));
+    m.set_col(1,Vec3f(4,5,6));
+    m.set_col(2,Vec3f(7,8,9));
+    Vec3f v=Vec3f(1,1,1);
+    Vec3f res=m*v;
+    for(int i=0;i<3;i++){
+        std::cout<<res[i]<<" ";
     }
+    std::cout<<std::endl;
+    // PhongShader shader;
+    // for (int i=0; i<model->nfaces(); i++) {
+    //     for (int j=0; j<3; j++) {
+    //         shader.vertex(i, j);
+    //     }
+    //     // std::cout<<i<<std::endl;
+    //     drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
+    // }
     // sdl code to render object in window
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,0);
