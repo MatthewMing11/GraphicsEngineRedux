@@ -76,6 +76,8 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
     Viewport(0,0) = w/2.f;
     Viewport(1,1) = h/2.f;
     Viewport(2,2) = 255/2.f;
+    // Viewport(2,2)=0;
+    // Viewport(2,3)=1.f;
 }
 void projection(float r){//initializes projection matrix
     Projection=Matrix::identity(4);
@@ -178,12 +180,12 @@ void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *
             pts2(i,j) =(pts(i,j)/pts(i,3));
         }
     }
-    for(int i=0;i<3;i++){
-        for(int j=0;j<2;j++){
-            std::cout<<pts2(i,j)<<" ";
-        }
-        std::cout<<std::endl;
-    }
+    // for(int i=0;i<3;i++){
+    //     for(int j=0;j<2;j++){
+    //         std::cout<<pts2(i,j)<<" ";
+    //     }
+    //     std::cout<<std::endl;
+    // }
     Vec3f bboxmin( std::numeric_limits<float>::max(),  std::numeric_limits<float>::max(),0);
     Vec3f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),0);
     Vec3f clamp(width-1, height-1,0);
@@ -206,8 +208,9 @@ void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *
             pixel.y=y;
             Vec3f bc_screen  = barycentric(b1,b2,b3,pixel);
             Vec3f bc_clip    = Vec3f(bc_screen[0]/pts(0,3), bc_screen[1]/pts(1,3), bc_screen[2]/pts(2,3));
-            float bc_clip_total=bc_clip[0]+bc_clip[1]+bc_clip[2];
-            bc_clip = Vec3f(bc_clip[0]/bc_clip_total,bc_clip[1]/bc_clip_total,bc_clip[2]/bc_clip_total);
+            // float bc_clip_total=bc_clip[0]+bc_clip[1]+bc_clip[2];
+            // bc_clip = Vec3f(bc_clip[0]/bc_clip_total,bc_clip[1]/bc_clip_total,bc_clip[2]/bc_clip_total);
+            bc_clip=bc_clip/(bc_clip[0]+bc_clip[1]+bc_clip[2]);
             float frag_depth = Vec3f(clipc(2,0),clipc(2,1),clipc(2,2))*bc_clip;
             if (bc_screen[0]<0 || bc_screen[1]<0 || bc_screen[2]<0 || zbuffer[y*width+x]>frag_depth) continue;
             bool discard = shader.fragment(bc_clip, color);

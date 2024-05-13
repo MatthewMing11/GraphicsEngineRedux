@@ -9,6 +9,7 @@ class Vec3f{//inspired by Vec3f java graphics class
         Vec3f operator-(Vec3f const& obj);
         float operator*(Vec3f const& obj);//dot product
         Vec3f operator*(float const& k);//scalar multiplication
+        Vec3f operator/(float const& k);
         Vec3f operator^(Vec3f const& obj);//cross product
         float& operator[](int index);
         Vec3f& operator+=(Vec3f const& obj);
