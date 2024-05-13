@@ -136,7 +136,8 @@ struct PhongShader : public Shader {
         // Vec3f n = (B*normal).normalize();
 
         // float diff = std::max(0.f, n*light_dir);
-        color = model->diffuse(uv)*diff;
+        uint32_t c=model->diffuse(uv);
+        color = (static_cast<int>((c>>16)*diff) <<16) + (static_cast<int>(((c>>8)&0xff)*diff)<<8)+static_cast<int>((c&0xff)*diff);
         // std::cout<<color<<std::endl;
         return false;
     }
@@ -150,13 +151,13 @@ int main(int argc, char * argv[]){
     lookat(eye,center,up);
     viewport(width/8,height/8,width*3/4,height*3/4);
     projection(-1.f/(eye-center).norm());
-    // Matrix light=(Projection*ModelView*Matrix(light_dir, 0.f));
-    // light_dir=Vec3f(light(0,0),light(1,0),light(2,0));
+    Matrix light=(Projection*ModelView*Matrix(light_dir, 0.f));
+    light_dir=Vec3f(light(0,0),light(1,0),light(2,0));
     light_dir.normalize();
 
     textureBuffer= new uint32_t[ width * height ];
     zbuffer = new float[width * height];
-    // for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
+    for (int i=width*height; i--; zbuffer[i] = -std::numeric_limits<float>::max());
     
     // GourandShader shader;
     // for(int i=0;i<model->nfaces();i++){
@@ -179,24 +180,14 @@ int main(int argc, char * argv[]){
     //     }
     //     drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
     // }
-    Matrix m=Matrix(3,3);
-    m.set_col(0,Vec3f(1,2,3));
-    m.set_col(1,Vec3f(4,5,6));
-    m.set_col(2,Vec3f(7,8,9));
-    Vec3f v=Vec3f(1,1,1);
-    Vec3f res=m*v;
-    for(int i=0;i<3;i++){
-        std::cout<<res[i]<<" ";
+    PhongShader shader;
+    for (int i=0; i<model->nfaces(); i++) {
+        for (int j=0; j<3; j++) {
+            shader.vertex(i, j);
+        }
+        // std::cout<<i<<std::endl;
+        drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
     }
-    std::cout<<std::endl;
-    // PhongShader shader;
-    // for (int i=0; i<model->nfaces(); i++) {
-    //     for (int j=0; j<3; j++) {
-    //         shader.vertex(i, j);
-    //     }
-    //     // std::cout<<i<<std::endl;
-    //     drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
-    // }
     // sdl code to render object in window
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,0);

@@ -72,12 +72,12 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
     Viewport = Matrix::identity(4);
     Viewport(0,3) = x+w/2.f;
     Viewport(1,3) = y+h/2.f;
-    Viewport(2,3) = 255/2.f;
+    // Viewport(2,3) = 255/2.f;
     Viewport(0,0) = w/2.f;
     Viewport(1,1) = h/2.f;
-    Viewport(2,2) = 255/2.f;
-    // Viewport(2,2)=0;
-    // Viewport(2,3)=1.f;
+    // Viewport(2,2) = 255/2.f;
+    Viewport(2,2)=0;
+    Viewport(2,3)=1.f;
 }
 void projection(float r){//initializes projection matrix
     Projection=Matrix::identity(4);
@@ -87,13 +87,20 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     Vec3f z=(eye-center).normalize();
     Vec3f x= (up^z).normalize();
     Vec3f y= (z^x).normalize();
-    ModelView=Matrix::identity(4);
+    // ModelView=Matrix::identity(4);
+    Matrix Minv=Matrix::identity();
+    Matrix Tr = Matrix::identity();
     for(int i=0;i<3;i++){
-        ModelView(0,i)=x[i];
-        ModelView(1,i)=y[i];
-        ModelView(2,i)=z[i];
-        ModelView(i,3)=-center[i];
+        // ModelView(0,i)=x[i];
+        // ModelView(1,i)=y[i];
+        // ModelView(2,i)=z[i];
+        // ModelView(i,3)=-center[i];
+        Minv(0,i)=x[i];
+        Minv(1,i)=y[i];
+        Minv(2,i)=z[i];
+        Tr(i,3)=-center[i];
     }
+    ModelView=Minv*Tr;
 }
 Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     // float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
