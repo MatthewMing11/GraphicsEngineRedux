@@ -126,11 +126,6 @@ Vec3f Model::normal(Vec3f uvf){
     return res;
 }
 Vertex Model::vert(int iface, int nthvert){
-    // Matrix res = Matrix(4,1);
-    // res(0,0)=vertices[faces[iface].points[nthvert]].x;
-    // res(1,0)=vertices[faces[iface].points[nthvert]].y;
-    // res(2,0)=vertices[faces[iface].points[nthvert]].z;
-    // res(3,0)=1;
     return vertices[faces[iface].points[nthvert]];
 }
 Vec3f Model::uv(int iface,int nthvert){

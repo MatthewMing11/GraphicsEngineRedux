@@ -72,10 +72,8 @@ void viewport(int x, int y, int w, int h){//initializes viewport matrix
     Viewport = Matrix::identity(4);
     Viewport(0,3) = x+w/2.f;
     Viewport(1,3) = y+h/2.f;
-    // Viewport(2,3) = 255/2.f;
     Viewport(0,0) = w/2.f;
     Viewport(1,1) = h/2.f;
-    // Viewport(2,2) = 255/2.f;
     Viewport(2,2)=0;
     Viewport(2,3)=1.f;
 }
@@ -103,12 +101,6 @@ void lookat(Vec3f eye, Vec3f center, Vec3f up){//initializes ModelView matrix
     ModelView=Minv*Tr;
 }
 Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
-    // float det=(p2.y-p3.y)*(p1.x-p3.x)+(p3.x-p2.x)*(p1.y-p3.y);
-    // //barycentric coords
-    // float b1=((p2.y-p3.y)*(test_p.x-p3.x)+(p3.x-p2.x)*(test_p.y-p3.y))*1.0f/det;
-    // float b2=((p3.y-p1.y)*(test_p.x-p3.x)+(p1.x-p3.x)*(test_p.y-p3.y))*1.0f/det;
-    // float b3=1-b1-b2;
-    // Vec3f res=Vec3f(b3,b2,b1);
     Vec3f s[2];
     Vec3f A={p1.x,p1.y,p1.z};
     Vec3f B={p2.x,p2.y,p2.z};
@@ -123,7 +115,6 @@ Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
     if(std::abs(u[2])>1e-2)
         return Vec3f(1.f-(u[0]+u[1])/u[2],u[1]/u[2],u[0]/u[2]);
     return Vec3f(-1,1,1);
-    // return res;
 }
 
 // void drawTriangle(Matrix *pts,Shader &shader,uint32_t *textureBuffer,float *zbuffer, int width, int height){//mesh looks better in higher dimensions, might need antialiasing
@@ -168,40 +159,20 @@ Vec3f barycentric(Vertex &p1,Vertex &p2,Vertex &p3, Vertex &test_p){
 //     }
 // }
 void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *zbuffer, int width, int height) {//specifically for Phong shading
-    // for(int i1=0;i1<4;i1++){
-    //     for(int j1=0;j1<3;j1++){
-    //         std::cout<<clipc(i1,j1)<<" ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
     Matrix pts  = (Viewport*clipc).transpose(); // transposed to ease access to each of the points
     Matrix pts2 = Matrix(3,2);
-    // for(int i1=0;i1<3;i1++){
-    //     for(int j1=0;j1<4;j1++){
-    //         std::cout<<pts(i1,j1)<<" ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
     for (int i=0; i<3; i++) {
         for(int j=0;j<2;j++){
             pts2(i,j) =(pts(i,j)/pts(i,3));
         }
     }
-    // for(int i=0;i<3;i++){
-    //     for(int j=0;j<2;j++){
-    //         std::cout<<pts2(i,j)<<" ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
     Vec3f bboxmin( std::numeric_limits<float>::max(),  std::numeric_limits<float>::max(),0);
     Vec3f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),0);
     Vec3f clamp(width-1, height-1,0);
     for (int i=0; i<3; i++) {
         for (int j=0; j<2; j++) {
             bboxmin[j] = std::max(0.f,      std::min(bboxmin[j], pts2(i,j)));
-            // std::cout<<"bboxmin["<<j<<"]="<<bboxmin[j]<<std::endl;
             bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts2(i,j)));
-            // std::cout<<"bboxmax["<<j<<"]="<<bboxmax[j]<<std::endl;
         }
     }
     uint32_t color=0;
@@ -215,8 +186,6 @@ void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *
             pixel.y=y;
             Vec3f bc_screen  = barycentric(b1,b2,b3,pixel);
             Vec3f bc_clip    = Vec3f(bc_screen[0]/pts(0,3), bc_screen[1]/pts(1,3), bc_screen[2]/pts(2,3));
-            // float bc_clip_total=bc_clip[0]+bc_clip[1]+bc_clip[2];
-            // bc_clip = Vec3f(bc_clip[0]/bc_clip_total,bc_clip[1]/bc_clip_total,bc_clip[2]/bc_clip_total);
             bc_clip=bc_clip/(bc_clip[0]+bc_clip[1]+bc_clip[2]);
             float frag_depth = Vec3f(clipc(2,0),clipc(2,1),clipc(2,2))*bc_clip;
             if (bc_screen[0]<0 || bc_screen[1]<0 || bc_screen[2]<0 || zbuffer[y*width+x]>frag_depth) continue;

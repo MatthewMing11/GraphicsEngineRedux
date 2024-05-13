@@ -98,7 +98,6 @@ Matrix Matrix::operator*(Matrix const& obj)//matrix multiplication
             }
         }
     }
-    // std::cout<<"Done"<<std::endl;
     return res;
 }
 Vec3f Matrix::operator*(Vec3f const& obj)
@@ -112,7 +111,6 @@ Vec3f Matrix::operator*(Vec3f const& obj)
             res[i]+=arr[i][k]*obj[k];
         }
     }
-    // std::cout<<"Done"<<std::endl;
     return res;
 }
 Matrix Matrix::invert_transpose(){

@@ -87,10 +87,6 @@ struct PhongShader : public Shader {
         Matrix normal =(Projection*ModelView).invert_transpose()*Matrix(model->v_normal(iface, nthvert), 0.f);
         varying_nrm.set_col(nthvert, Vec3f(normal(0,0),normal(1,0),normal(2,0)));
         Matrix vertex = Projection*ModelView*Matrix(model->vert(iface, nthvert),1);
-        // for(int i=0;i<4;i++){
-        //     std::cout<<vertex(i,0)<<" ";
-        // }
-        // std::cout<<std::endl;
         varying_tri.set_col(nthvert, Vec3f(vertex(0,0),vertex(1,0),vertex(2,0)));
         // std::cout<<vertex(3,0)<<" missing"<<std::endl;
         varying_tri(3,nthvert)=vertex(3,0);//temp fix for w coord not being read in set_col
@@ -99,20 +95,6 @@ struct PhongShader : public Shader {
     }
 
     virtual bool fragment(Vec3f bar, uint32_t &color) {
-        // std::cout<<"varying_nrm"<<std::endl;
-        // for(int i=0;i<3;i++){
-        //     for(int j=0;j<3;j++){
-        //         std::cout<<varying_nrm(i,j)<<" ";
-        //     }
-        //     std::cout<<std::endl;
-        // }
-        // std::cout<<"varying_uv"<<std::endl;
-        // for(int i=0;i<2;i++){
-        //     for(int j=0;j<3;j++){
-        //         std::cout<<varying_nrm(i,j)<<" ";
-        //     }
-        //     std::cout<<std::endl;
-        // }
         Vec3f bn = (varying_nrm*bar).normalize();
         Vec3f uv = varying_uv*bar;
         float diff = std::max(0.f, bn*light_dir);
@@ -138,7 +120,6 @@ struct PhongShader : public Shader {
         // float diff = std::max(0.f, n*light_dir);
         uint32_t c=model->diffuse(uv);
         color = (static_cast<int>((c>>16)*diff) <<16) + (static_cast<int>(((c>>8)&0xff)*diff)<<8)+static_cast<int>((c&0xff)*diff);
-        // std::cout<<color<<std::endl;
         return false;
     }
 }; 
