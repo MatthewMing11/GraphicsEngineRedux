@@ -110,8 +110,8 @@ Model::Model(char* path,int width,int height)
         }
     }
     load_texture(path, "_diffuse.tga", diffusemap_);
-    load_texture(path, "_nm.tga",      normalmap_);
-    // load_texture(path, "_nm_tangent.tga",      normalmap_);
+    // load_texture(path, "_nm.tga",      normalmap_);
+    load_texture(path, "_nm_tangent.tga",      normalmap_);
     load_texture(path, "_spec.tga",    specularmap_);
 }
 Vec3f Model::v_normal(int iface, int nthvert){

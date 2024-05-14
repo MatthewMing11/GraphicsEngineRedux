@@ -4,7 +4,8 @@
 #include "model.h"
 #include <iostream>
 #include <limits>
-
+#include <math.h>//for M_PI
+#include <cmath>
 Model *model = NULL;
 const int width=640;
 const int height=480;
@@ -172,11 +173,39 @@ struct ImprovedPhongReflectShader : public Shader {
         return false;
     }
 };
+struct ZShader : public Shader {
+    Matrix varying_tri=Matrix(4,3);
+
+    virtual Matrix vertex(int iface, int nthvert) {
+        Matrix vertex = Projection*ModelView*Matrix(model->vert(iface, nthvert),1);
+        varying_tri.set_col(nthvert,Vec3f(vertex(0,0),vertex(1,0),vertex(2,0)));
+        varying_tri(3,nthvert)=vertex(3,0);
+        return vertex;
+    }
+
+    virtual bool fragment(Vec3f gl_FragCoord, Vec3f bar, uint32_t &color) {
+        color = 0;
+        return false;
+    }
+};
+float max_elevation_angle(float *zbuffer, Vec3f p, Vec3f dir) {
+    float maxangle = 0;
+    for (float t=0.; t<1000.; t+=1.) {
+        Vec3f cur = p + dir*t;
+        if (cur[0]>=width || cur[1]>=height || cur[0]<0 || cur[1]<0) return maxangle;
+
+        float distance = (p-cur).norm();
+        if (distance < 1.f) continue;
+        float elevation = zbuffer[int(cur[0])+int(cur[1])*width]-zbuffer[int(p[0])+int(p[1])*width];
+        maxangle = std::max(maxangle, atanf(elevation/distance));
+    }
+    return maxangle;
+}
 int main(int argc, char * argv[]){
     if (argc==2){
         model = new Model(argv[1],width,height);
     } else{
-        model = new Model("obj/african_head.obj",width,height);
+        model = new Model("obj/diablo3_pose.obj",width,height);
     }
     // lookat(eye,center,up);
     // viewport(width/8,height/8,width*3/4,height*3/4);
@@ -218,42 +247,70 @@ int main(int argc, char * argv[]){
     //     // std::cout<<i<<std::endl;
     //     drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
     // }
-    shadowbuffer   = new float[width*height];
-    depth = new uint32_t[width * height];
-    for (int i=width*height; --i; ) {
-        zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
-    }
-    { // rendering the shadow buffer
-        Vec3f light_dir(1,1,0);
-        Vec3f eye(1,1,4);
-        Vec3f center(0,0,0);
-        Vec3f up (0,1,0);
-        lookat(light_dir, center, up);
-        viewport(width/8, height/8, width*3/4, height*3/4);
-        projection(0);
+    // shadowbuffer   = new float[width*height];
+    // depth = new uint32_t[width * height];
+    // for (int i=width*height; --i; ) {
+    //     zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
+    // }
+    // { // rendering the shadow buffer
+    //     Vec3f light_dir(1,1,0);
+    //     Vec3f eye(1,1,4);
+    //     Vec3f center(0,0,0);
+    //     Vec3f up (0,1,0);
+    //     lookat(light_dir, center, up);
+    //     viewport(width/8, height/8, width*3/4, height*3/4);
+    //     projection(0);
 
-        DepthShader depthshader;
-        Matrix screen_coords[3];
-        for (int i=0; i<model->nfaces(); i++) {
-            for (int j=0; j<3; j++) {
-                screen_coords[j] = depthshader.vertex(i, j);
-            }
-            drawTriangle(screen_coords, depthshader, depth, shadowbuffer,width,height);
+    //     DepthShader depthshader;
+    //     Matrix screen_coords[3];
+    //     for (int i=0; i<model->nfaces(); i++) {
+    //         for (int j=0; j<3; j++) {
+    //             screen_coords[j] = depthshader.vertex(i, j);
+    //         }
+    //         drawTriangle(screen_coords, depthshader, depth, shadowbuffer,width,height);
+    //     }
+    // }
+    // Matrix M = Viewport*Projection*ModelView;
+    // { // rendering the texture buffer
+    //     lookat(eye, center, up);
+    //     viewport(width/8, height/8, width*3/4, height*3/4);
+    //     projection(-1.f/(eye-center).norm());
+
+    //     ImprovedPhongReflectShader shader(ModelView, (Projection*ModelView).invert_transpose(), Matrix::identity(4));
+    //     Matrix screen_coords[3];
+    //     for (int i=0; i<model->nfaces(); i++) {
+    //         for (int j=0; j<3; j++) {
+    //             screen_coords[j] = shader.vertex(i, j);
+    //         }
+    //         drawTriangle(screen_coords, shader, textureBuffer, zbuffer,width,height);
+    //     }
+    // }
+    ZShader zshader;
+    Vec3f       eye(1.2,-.8,3);
+    Vec3f    center(0,0,0);
+    Vec3f        up(0,1,0);
+    lookat(eye, center, up);
+    viewport(width/8, height/8, width*3/4, height*3/4);
+    projection(-1.f/(eye-center).norm());
+    for (int i=0; i<model->nfaces(); i++) {
+        for (int j=0; j<3; j++) {
+            zshader.vertex(i, j);
         }
+        drawTriangle(zshader.varying_tri, zshader, textureBuffer, zbuffer,width,height);
     }
-    Matrix M = Viewport*Projection*ModelView;
-    { // rendering the texture buffer
-        lookat(eye, center, up);
-        viewport(width/8, height/8, width*3/4, height*3/4);
-        projection(-1.f/(eye-center).norm());
 
-        ImprovedPhongReflectShader shader(ModelView, (Projection*ModelView).invert_transpose(), Matrix::identity(4));
-        Matrix screen_coords[3];
-        for (int i=0; i<model->nfaces(); i++) {
-            for (int j=0; j<3; j++) {
-                screen_coords[j] = shader.vertex(i, j);
+    for (int x=0; x<width; x++) {
+        for (int y=0; y<height; y++) {
+            if (zbuffer[x+y*width] < -1e5) continue;
+            float total = 0;
+            for (float a=0; a<M_PI*2-1e-4; a += M_PI/4) {
+                total += M_PI/2 - max_elevation_angle(zbuffer, Vec3f(x, y,0), Vec3f(cos(a), sin(a),0));
             }
-            drawTriangle(screen_coords, shader, textureBuffer, zbuffer,width,height);
+            total /= (M_PI/2)*8;
+            total = pow(total, 100.f);
+            int intensity_i=static_cast<int>(total*255);
+            int color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
+            textureBuffer[y*width + x] = color;
         }
     }
     // sdl code to render object in window
