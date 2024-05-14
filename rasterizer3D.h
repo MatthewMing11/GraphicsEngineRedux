@@ -6,6 +6,7 @@
 extern Matrix ModelView;
 extern Matrix Viewport;
 extern Matrix Projection;
+const float depthNum = 2000.f;//idk why there's two depth variables, will change name to something more appropriate
 
 void viewport(int x,int y, int w, int h);
 void projection(float coeff=0.f); // coeff = -1/c
@@ -17,6 +18,6 @@ struct Shader{
     virtual bool fragment(Vec3f bar, uint32_t &color) = 0;
 };
 
-// void drawTriangle(Matrix *pts,Shader &shader,uint32_t *textureBuffer,float *zbuffer,int width, int height);
+void drawTriangle(Matrix *pts,Shader &shader,uint32_t *textureBuffer,float *zbuffer,int width, int height);
 
-void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *zbuffer, int width, int height);
+// void drawTriangle(Matrix &clipc, Shader &shader, uint32_t *textureBuffer,float *zbuffer, int width, int height); // for phongshading

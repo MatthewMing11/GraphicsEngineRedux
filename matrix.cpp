@@ -265,7 +265,10 @@ Matrix Matrix::transpose(){
     }
     return res;
 }
-Matrix Matrix::invert(){
+Matrix Matrix::invert(){//currently only have invert for 3x3 and 4x4 matrices
+    if(w=4){
+        return invert_transpose().transpose();
+    }
     Matrix m=Matrix(3,3);
     for(int i=0;i<3;i++){
         for(int j=0;j<3;j++){

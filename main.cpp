@@ -10,6 +10,8 @@ const int width=640;
 const int height=480;
 uint32_t *textureBuffer;
 float *zbuffer;
+float *shadowbuffer;
+uint32_t *depth;
 
 Vec3f light_dir(1,1,1);
 Vec3f eye(1,1,3);
@@ -80,7 +82,7 @@ struct PhongShader : public Shader {
     Matrix varying_uv=Matrix(2,3);  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
     Matrix varying_nrm=Matrix(3,3); // normal per vertex to be interpolated by FS
     Matrix varying_tri=Matrix(4,3); // to be used externally for phong shading
-    // Matrix ndc_tri=Matrix(3,3);     // triangle in normalized device coordinates
+    Matrix ndc_tri=Matrix(3,3);     // triangle in normalized device coordinates
 
     virtual Matrix vertex(int iface, int nthvert) {
         varying_uv.set_col(nthvert, model->uv(iface, nthvert));
@@ -90,50 +92,97 @@ struct PhongShader : public Shader {
         varying_tri.set_col(nthvert, Vec3f(vertex(0,0),vertex(1,0),vertex(2,0)));
         // std::cout<<vertex(3,0)<<" missing"<<std::endl;
         varying_tri(3,nthvert)=vertex(3,0);//temp fix for w coord not being read in set_col
-        // ndc_tri.set_col(nthvert, Vec3f(vertex(0,0)/vertex(3,0),vertex(1,0)/vertex(3,0),vertex(2,0)/vertex(3,0)));
+        ndc_tri.set_col(nthvert, Vec3f(vertex(0,0),vertex(1,0),vertex(2,0))/vertex(3,0));
         return vertex;
     }
 
     virtual bool fragment(Vec3f bar, uint32_t &color) {
         Vec3f bn = (varying_nrm*bar).normalize();
         Vec3f uv = varying_uv*bar;
-        float diff = std::max(0.f, bn*light_dir);
-        // Matrix A=Matrix(3,3);
-        // for(int i=0;i<3;i++){
-        //     A(0,i) = (ndc_tri.col(1) - ndc_tri.col(0))[i];
-        //     A(1,i) = (ndc_tri.col(2) - ndc_tri.col(0))[i];
-        //     A(2,i) = bn[i];
-        // }
-        // Matrix AI= A.invert();
-        // Vec3f first=Vec3f(varying_uv(0,1) - varying_uv(0,0), varying_uv(0,2) - varying_uv(0,0), 0);
-        // Vec3f second = Vec3f(varying_uv(1,1) - varying_uv(1,0), varying_uv(1,2) - varying_uv(1,0), 0);
-        // Vec3f i = AI * first;
-        // Vec3f j = AI * second;
+        // float diff = std::max(0.f, bn*light_dir);
+        Matrix A=Matrix(3,3);
+        for(int i=0;i<3;i++){
+            A(0,i) = (ndc_tri.col(1) - ndc_tri.col(0))[i];
+            A(1,i) = (ndc_tri.col(2) - ndc_tri.col(0))[i];
+            A(2,i) = bn[i];
+        }
+        Matrix AI= A.invert();
+        Vec3f i = AI * Vec3f(varying_uv(0,1) - varying_uv(0,0), varying_uv(0,2) - varying_uv(0,0), 0);
+        Vec3f j = AI * Vec3f(varying_uv(1,1) - varying_uv(1,0), varying_uv(1,2) - varying_uv(1,0), 0);
 
-        // Matrix B=Matrix(3,3);
-        // B.set_col(0, i.normalize());
-        // B.set_col(1, j.normalize());
-        // B.set_col(2, bn);
-        // Vec3f normal = model->normal(uv);
-        // Vec3f n = (B*normal).normalize();
+        Matrix B=Matrix(3,3);
+        B.set_col(0, i.normalize());
+        B.set_col(1, j.normalize());
+        B.set_col(2, bn);
+        Vec3f n = (B*model->normal(uv)).normalize();
 
-        // float diff = std::max(0.f, n*light_dir);
+        float diff = std::max(0.f, n*light_dir);
         uint32_t c=model->diffuse(uv);
         color = (static_cast<int>((c>>16)*diff) <<16) + (static_cast<int>(((c>>8)&0xff)*diff)<<8)+static_cast<int>((c&0xff)*diff);
         return false;
     }
 }; 
+struct DepthShader : public Shader {
+    Matrix varying_tri;
+    DepthShader() : varying_tri(Matrix(3,3)) {}
+    virtual Matrix vertex(int iface, int nthvert) {
+        Matrix vertex = Matrix(model->vert(iface, nthvert),1); // read the vertex from .obj file
+        vertex = Viewport*Projection*ModelView*vertex;          // transform it to screen coordinates
+        varying_tri.set_col(nthvert,Vec3f(vertex(0,0),vertex(1,0),vertex(2,0))/vertex(3,0));
+        return vertex;
+    }
+
+    virtual bool fragment(Vec3f bar, uint32_t &color) {
+        Vec3f p = varying_tri*bar;
+        color =((static_cast<int>(p[2]*255/depthNum)& 0xff)<<16) + ((static_cast<int>(p[2]*255/depthNum)& 0xff)<<8)+(static_cast<int>(p[2]*255/depthNum)& 0xff);
+        return false;
+    }
+};
+struct ImprovedPhongReflectShader : public Shader {
+    Matrix uniform_M=Matrix(4,4);   //  Projection*ModelView
+    Matrix uniform_MIT=Matrix(4,4); // (Projection*ModelView).invert_transpose()
+    Matrix uniform_Mshadow=Matrix(4,4); // transform framebuffer screen coordinates to shadowbuffer screen coordinates
+    Matrix varying_uv;  // triangle uv coordinates, written by the vertex shader, read by the fragment shader
+    Matrix varying_tri; // triangle coordinates before Viewport transform, written by VS, read by FS
+
+    ImprovedPhongReflectShader(Matrix M, Matrix MIT, Matrix MS) : uniform_M(M), uniform_MIT(MIT), uniform_Mshadow(MS), varying_uv(Matrix(2,3)), varying_tri(Matrix(3,3)) {}
+
+    virtual Matrix vertex(int iface, int nthvert) {
+        varying_uv.set_col(nthvert, model->uv(iface, nthvert));
+        Matrix vertex = Viewport*Projection*ModelView*Matrix(model->vert(iface, nthvert),1);
+        varying_tri.set_col(nthvert,Vec3f(vertex(0,0),vertex(1,0),vertex(2,0))/vertex(3,0));
+        return vertex;
+    }
+
+    virtual bool fragment(Vec3f bar, uint32_t &color) {
+        Matrix sb_p = uniform_Mshadow*Matrix(varying_tri*bar,1); // corresponding point in the shadow buffer
+        Vec3f sb_pv=Vec3f(sb_p(0,0),sb_p(1,0),sb_p(2,0))/sb_p(3,0);
+        int idx = int(sb_pv[0]) + int(sb_pv[1])*width; // index in the shadowbuffer array
+        float shadow = .3+.7*(shadowbuffer[idx]<sb_pv[2]+43.34); // magic coeff to avoid z-fighting
+        Vec3f uv = varying_uv*bar;                 // interpolate uv for the current pixel
+        Matrix normal=uniform_MIT*Matrix(model->normal(uv),1);
+        Vec3f n = Vec3f(normal(0,0),normal(1,0),normal(2,0)).normalize(); // normal
+        Matrix light=uniform_M  *Matrix(light_dir,1);
+        Vec3f l = Vec3f(light(0,0),light(1,0),light(2,0)).normalize(); // light vector
+        Vec3f r = (n*(n*l*2.f) - l).normalize();   // reflected light
+        float spec = pow(std::max(r[2], 0.0f), model->specular(uv));
+        float diff = std::max(0.f, n*l);
+        uint32_t c = model->diffuse(uv);
+        color=(static_cast<int>(std::min<float>(20 + (c>>16)*shadow*(1.2*diff + .6*spec), 255))<<16) + (static_cast<int>(std::min<float>(20 + ((c>>8)&0xff)*shadow*(1.2*diff + .6*spec), 255))<<8)+static_cast<int>(std::min<float>(20 + (c&0xff)*shadow*(1.2*diff + .6*spec), 255));
+        return false;
+    }
+};
 int main(int argc, char * argv[]){
     if (argc==2){
         model = new Model(argv[1],width,height);
     } else{
         model = new Model("obj/african_head.obj",width,height);
     }
-    lookat(eye,center,up);
-    viewport(width/8,height/8,width*3/4,height*3/4);
-    projection(-1.f/(eye-center).norm());
-    Matrix light=(Projection*ModelView*Matrix(light_dir, 0.f));
-    light_dir=Vec3f(light(0,0),light(1,0),light(2,0));
+    // lookat(eye,center,up);
+    // viewport(width/8,height/8,width*3/4,height*3/4);
+    // projection(-1.f/(eye-center).norm());
+    // Matrix light=(Projection*ModelView*Matrix(light_dir, 0.f));
+    // light_dir=Vec3f(light(0,0),light(1,0),light(2,0));
     light_dir.normalize();
 
     textureBuffer= new uint32_t[ width * height ];
@@ -161,13 +210,51 @@ int main(int argc, char * argv[]){
     //     }
     //     drawTriangle(screen_coords,shader,textureBuffer,zbuffer,width,height);
     // }
-    PhongShader shader;
-    for (int i=0; i<model->nfaces(); i++) {
-        for (int j=0; j<3; j++) {
-            shader.vertex(i, j);
+    // PhongShader shader;
+    // for (int i=0; i<model->nfaces(); i++) {
+    //     for (int j=0; j<3; j++) {
+    //         shader.vertex(i, j);
+    //     }
+    //     // std::cout<<i<<std::endl;
+    //     drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
+    // }
+    shadowbuffer   = new float[width*height];
+    depth = new uint32_t[width * height];
+    for (int i=width*height; --i; ) {
+        zbuffer[i] = shadowbuffer[i] = -std::numeric_limits<float>::max();
+    }
+    { // rendering the shadow buffer
+        Vec3f light_dir(1,1,0);
+        Vec3f eye(1,1,4);
+        Vec3f center(0,0,0);
+        Vec3f up (0,1,0);
+        lookat(light_dir, center, up);
+        viewport(width/8, height/8, width*3/4, height*3/4);
+        projection(0);
+
+        DepthShader depthshader;
+        Matrix screen_coords[3];
+        for (int i=0; i<model->nfaces(); i++) {
+            for (int j=0; j<3; j++) {
+                screen_coords[j] = depthshader.vertex(i, j);
+            }
+            drawTriangle(screen_coords, depthshader, depth, shadowbuffer,width,height);
         }
-        // std::cout<<i<<std::endl;
-        drawTriangle(shader.varying_tri, shader,textureBuffer,zbuffer,width,height);
+    }
+    Matrix M = Viewport*Projection*ModelView;
+    { // rendering the texture buffer
+        lookat(eye, center, up);
+        viewport(width/8, height/8, width*3/4, height*3/4);
+        projection(-1.f/(eye-center).norm());
+
+        ImprovedPhongReflectShader shader(ModelView, (Projection*ModelView).invert_transpose(), Matrix::identity(4));
+        Matrix screen_coords[3];
+        for (int i=0; i<model->nfaces(); i++) {
+            for (int j=0; j<3; j++) {
+                screen_coords[j] = shader.vertex(i, j);
+            }
+            drawTriangle(screen_coords, shader, textureBuffer, zbuffer,width,height);
+        }
     }
     // sdl code to render object in window
     SDL_Init(SDL_INIT_EVERYTHING);
