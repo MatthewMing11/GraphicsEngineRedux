@@ -19,6 +19,29 @@ Vec3f eye(1,1,3);
 Vec3f center(0,0,0);
 Vec3f up (0,1,0);
 
+struct FlatShader : public Shader {//FlatShader by tinyrenderer
+    Vec3f varying_intensity; //written by vertex shader, read by fragment shader
+
+    virtual Matrix vertex(int iface, int nthvert){
+        varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
+        Matrix vertex=Matrix(model->vert(iface,nthvert),1); // read the vertex from .obj file
+        // std::cout<<"V and P"<<std::endl;//stalls when separated, will fix this behavior later
+        // Viewport=Viewport * Projection;
+        // std::cout<<"V and M"<<std::endl;
+        // Viewport=Viewport * ModelView;
+        // std::cout<<"V and v"<<std::endl;
+        // Viewport= Viewport * vertex;
+        // return Viewport;
+        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+    }
+
+    virtual bool fragment(Vec3f bar, uint32_t &color){
+        float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
+        int intensity_i=static_cast<int>(intensity*255);
+        color=((intensity_i& 0xff)<<16) + ((intensity_i& 0xff)<<8)+(intensity_i& 0xff);
+        return false; //we do not discard this pixel
+    }
+};
 struct GourandShader : public Shader {
     Vec3f varying_intensity; //written by vertex shader, read by fragment shader
 
@@ -52,6 +75,33 @@ struct GourandShader : public Shader {
     //     color=((static_cast<int>(intensity*255)& 0xff)<<16) + ((static_cast<int>(intensity*155)& 0xff)<<8);
     //     return false; //we do not discard this pixel
     // }
+};
+struct ToonShader : public Shader {//ToonShader from tinyrenderer
+    Vec3f varying_intensity; //written by vertex shader, read by fragment shader
+
+    virtual Matrix vertex(int iface, int nthvert){
+        varying_intensity[nthvert] = std::max(0.f,model->v_normal(iface,nthvert)*light_dir);//get diffuse lighting intensity
+        Matrix vertex=Matrix(model->vert(iface,nthvert),1); // read the vertex from .obj file
+        // std::cout<<"V and P"<<std::endl;//stalls when separated, will fix this behavior later
+        // Viewport=Viewport * Projection;
+        // std::cout<<"V and M"<<std::endl;
+        // Viewport=Viewport * ModelView;
+        // std::cout<<"V and v"<<std::endl;
+        // Viewport= Viewport * vertex;
+        // return Viewport;
+        return Viewport*Projection*ModelView*vertex; // transform it to screen coordinates
+    }
+    virtual bool fragment(Vec3f bar, uint32_t &color){
+        float intensity = varying_intensity*bar; // Interpolate intensity for the current pixel
+        if (intensity >.85) intensity =1;
+        else if (intensity > .60) intensity =.80;
+        else if (intensity > .45) intensity = .60;
+        else if (intensity > .30) intensity = .45;
+        else if (intensity > .15) intensity = .30;
+        else intensity =0;
+        color=((static_cast<int>(intensity*255)& 0xff)<<16) + ((static_cast<int>(intensity*155)& 0xff)<<8);
+        return false; //we do not discard this pixel
+    }
 };
 struct PhongReflectShader : public Shader {
     Matrix varying_uv=Matrix(2,3);  // same as above
